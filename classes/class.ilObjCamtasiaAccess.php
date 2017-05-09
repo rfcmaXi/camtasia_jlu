@@ -50,7 +50,7 @@ class ilObjCamtasiaAccess extends ilObjectPluginAccess
     function _checkAccess($a_cmd, $a_permission, $a_ref_id, $a_obj_id, $a_user_id = "")
     {
         global $ilUser, $ilAccess;
-
+        
         if ($a_user_id == "")
         {
             $a_user_id = $ilUser->getId();
@@ -58,6 +58,7 @@ class ilObjCamtasiaAccess extends ilObjectPluginAccess
 
         switch ($a_permission)
         {
+            case "read":
             case "visible":
 				if (!ilObjCamtasiaAccess::checkOnline($a_obj_id) &&
 					!$ilAccess->checkAccessOfUser($a_user_id, "write", "", $a_ref_id))
@@ -65,15 +66,6 @@ class ilObjCamtasiaAccess extends ilObjectPluginAccess
 					return false;
 				}
 				break;
-            
-            
-            case "read":
-                if (!ilObjCamtasiaAccess::checkOnline($a_obj_id) &&
-                    $ilAccess->checkAccessOfUser($a_user_id, "write", "", $a_ref_id))
-                {
-                    return true;
-                }
-                break;
         }
 
         return true;

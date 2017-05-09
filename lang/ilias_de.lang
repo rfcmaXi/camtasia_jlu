@@ -1,27 +1,32 @@
+// 
+// German Language File for Camtasia Plugin
+//
+<!-- language file start -->
 obj_xcam#:#E-Lecture
 objs_xcam#:#E-Lectures
 xcam_new#:#Neue E-Lecture anlegen
 objs_xcam_duplicate#:#E-Lecture kopieren
 xcam_add#:#E-Lecture anlegen
 new_camtasia#:#Einstellungen der E-Lecture
-
+<!-- -->
 title#:#Titel
 description#:#Beschreibung
 upload_file#:#Datei
 cancel#:#Abbruch
 no_create_permission#:#no create permission
-
+<!-- -->
 xcam_visible#:#E-Lecture ist sichtbar
-xcam_read#:#E-Lecture Lesezugriff
-xcam_write#:#E-Lecture Schreibzugriff
-xcam_delete#:#E-Lecture entfernen
-xcam_edit_permission#:#E-Lecture editieren
+xcam_read#:#E-Lecture lesen
+xcam_write#:#E-Lecture bearbeiten
+xcam_copy#:#E-Lecture kopieren
+xcam_delete#:#E-Lecture löschen
+xcam_edit_permission#:#Rechteeinstellungen bearbeiten
 grp_create_xcam#:#E-Lecture anlegen
 cat_create_xcam#:#E-Lecture anlegen
 fold_create_xcam#:#E-Lecture anlegen
 root_create_xcam#:#E-Lecture anlegen
 crs_create_xcam#:#E-Lecture anlegen
-
+<!-- -->
 upload#:#Einstellungen
 content#:#Aufzeichnung
 export#:#Export
@@ -35,7 +40,7 @@ no_record#:#Keine E-Lecture gefunden!
 file_not_patched#:#Keine oder fehlerhafte Camtasia-Dateien nach Entpacken gefunden.
 file_patched#:#E-Lecture erfolgreich hochgeladen.
 no_link#:#Eingaben nicht korrekt.
-
+<!-- -->
 new_file_title#:#Neue E-Lecture hochladen
 limitations#:#Achtung: Nur TechSmith Camtasia Zip-Archive hochladen. Eine existierende Aufzeichnung wird ersetzt.
 newfileform#:#Aktivieren
@@ -46,7 +51,7 @@ tafel_template#:#Tafelaufzeichnung
 new_file#:#Folienaufzeichnung
 stream_info#:#Beispiel:
 template_info#:#wird als Vorlage eingespielt.
-
+<!-- -->
 videoserver_url#:#URL
 videoserver_info#:#Bei der Angabe des Streams wird nur diese Adresse akzeptiert.
 ex_info#:#Wird als Beispielpfad im Import-Dialog angegeben.

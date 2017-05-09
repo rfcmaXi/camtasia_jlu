@@ -1,27 +1,32 @@
+// 
+// English Language File for Camtasia Plugin
+//
+<!-- language file start -->
 obj_xcam#:#E-Lecture
 objs_xcam#:#E-Lectures
 xcam_new#:#Create new E-Lecture
 objs_xcam_duplicate#:#Copy E-Lecture
 xcam_add#:#Create E-Lecture
 new_camtasia#:#Configuration
-
+<!-- -->
 title#:#Title
 description#:#Description
 upload_file#:#File
 cancel#:#Cancel
 no_create_permission#:#no create permission
-
+<!-- -->
 xcam_visible#:#E-Lecture is visible
-xcam_read#:#read access to E-Lecture
-xcam_write#:#write access to E-Lecture
-xcam_delete#:#delete E-Lecture
-xcam_edit_permission#:#edit E-Lecture
+xcam_read#:#Read access to E-Lecture
+xcam_write#:#Edit access to E-Lecture
+xcam_copy#:#Copy E-Lecture
+xcam_delete#:#Delete E-Lecture
+xcam_edit_permission#:#Change permission settings
 grp_create_xcam#:#Create E-Lecture
 cat_create_xcam#:#Create E-Lecture
 fold_create_xcam#:#Create E-Lecture
 root_create_xcam#:#Create E-Lecture
 crs_create_xcam#:#Create E-Lecture
-
+<!-- -->
 upload#:#Configuration
 content#:#Content
 export#:#Export
@@ -35,7 +40,7 @@ no_record#:#No E-Lecture found!
 file_not_patched#:#No or invalid Camtasia files found after unpacking.
 file_patched#:#E-Lecture successfully created
 no_link#:#Import failed. Please check your input.
-
+<!-- -->
 new_file_title#:#Upload new E-Lecture
 limitations#:#Attention: Upload TechSmith Camtasia Zip-Archives only. An existing record is replaced.
 newfileform#:#Activate
@@ -46,7 +51,7 @@ tafel_template#:#table recording
 new_file#:#slide recording
 stream_info#:#Example:
 template_info#:#is used as template.
-
+<!-- -->
 videoserver_url#:#URL
 videoserver_info#:#Only this url is accepted as media stream.
 ex_info#:#To serve as an example within the import dialog.

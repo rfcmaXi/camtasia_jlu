@@ -168,7 +168,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		
 		// Buttons
         $form_gui->addCommandButton("importCamtasiaAction", $this->txt("importCamtasiaAction"));
-		$form_gui->addCommandButton("cancel", $this->txt("cancel"));
+		//$form_gui->addCommandButton("cancel", $this->txt("cancel")); /no need
 		
 		$form_gui->setFormAction($this->ctrl->getFormAction($this, "importCamtasiaAction"));
 
