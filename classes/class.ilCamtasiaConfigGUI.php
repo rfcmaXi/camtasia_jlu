@@ -64,12 +64,6 @@ class ilCamtasiaConfigGUI extends ilPluginConfigGUI
         $ex->setInfo($pl->txt("tempfile_info"));
   		$form->addItem($ex);
         
-        //Backup Zip
-        $ba = new ilCheckboxInputGUI($pl->txt('enable_backup'), 'enable_backup');
-        $ba->setInfo($pl->txt("enable_backup_info"));
-        $ba->setChecked(ilObjCamtasia::getBackup());
-        $form->addItem($ba);
-        
 		$form->addCommandButton("save", $lng->txt("save"));
 		$form->setTitle($pl->txt("configuration"));
 		$form->setFormAction($ilCtrl->getFormAction($this));
@@ -91,12 +85,11 @@ class ilCamtasiaConfigGUI extends ilPluginConfigGUI
 			$server = $form->getInput("videoserver_url");
 			$exurl = $form->getInput("ex_url");
             $tempfile = $form->getInput("template_file");
-            $backup = $form->getInput("enable_backup");
             
             //Check tempfile
             if (file_exists(substr($_SERVER['SCRIPT_FILENAME'], 0, -10). "/Customizing/global/plugins/Services/Repository/RepositoryObject/Camtasia/templates/".$tempfile)) {
             
-            $this->setConfig($server, $exurl, $tempfile, $backup);            
+            $this->setConfig($server, $exurl, $tempfile);            
 			ilUtil::sendSuccess($pl->txt("config_saved"), true);
 			$ilCtrl->redirect($this, "configure");}
             
@@ -117,7 +110,7 @@ class ilCamtasiaConfigGUI extends ilPluginConfigGUI
 		global $ilDB;
 	
 		$ilDB->manipulate("DELETE FROM rep_robj_xcam_config");
-		$ilDB->manipulate("INSERT INTO rep_robj_xcam_config (videoserver,exurl,tempfile,backup) VALUES (" . $ilDB->quote($a_val, "text") . "," . $ilDB->quote($b_val, "text"). "," . $ilDB->quote($c_val, "text") . "," . $ilDB->quote($d_val, "boolean") . ")");
+		$ilDB->manipulate("INSERT INTO rep_robj_xcam_config (videoserver,exurl,tempfile) VALUES (" . $ilDB->quote($a_val, "text") . "," . $ilDB->quote($b_val, "text"). "," . $ilDB->quote($c_val, "text")  . ")");
     }
     
 }

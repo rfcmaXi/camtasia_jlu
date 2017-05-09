@@ -16,16 +16,22 @@ xcam_read#:#E-Lecture Lesezugriff
 xcam_write#:#E-Lecture Schreibzugriff
 xcam_delete#:#E-Lecture entfernen
 xcam_edit_permission#:#E-Lecture editieren
+grp_create_xcam#:#E-Lecture anlegen
+cat_create_xcam#:#E-Lecture anlegen
+fold_create_xcam#:#E-Lecture anlegen
+root_create_xcam#:#E-Lecture anlegen
+crs_create_xcam#:#E-Lecture anlegen
 
 upload#:#Einstellungen
 content#:#Aufzeichnung
+export#:#Export
 importCamtasiaAction#:#Speichern
 edit#:#Inhalt bearbeiten
 player_file#:#Startdatei
 player_file_info#:#Pfad zur Startdatei innerhalb des Zip-Archives
 status#:#Status
 offline#:#Offline
-no_record#:#Keine E-Lecture gefunden! Stellen sie sicher, dass die hochgeladene ZIP-Datei eine '_player.html' enthält.
+no_record#:#Keine E-Lecture gefunden!
 file_not_patched#:#Keine oder fehlerhafte Camtasia-Dateien nach Entpacken gefunden.
 file_patched#:#E-Lecture erfolgreich hochgeladen.
 no_link#:#Eingaben nicht korrekt.
@@ -47,8 +53,6 @@ ex_info#:#Wird als Beispielpfad im Import-Dialog angegeben.
 ex_url#:#Beispiel-URL
 template_file#:#Vorlagendatei
 tempfile_info#:#Wird beim Upload als Template verwendet. Datei muss unter "./Camtasia/templates/" abgelegt sein. Angabe inklusive *.zip.
-enable_backup#:#Backup der Originaldatei
-enable_backup_info#:#Wenn aktiviert, wird das Zip-Archiv mit in der E-Lecture abgelegt.
 no_ttfile#:#Vorlagendatei nicht gefunden.
 config_saved#:#Einstellungen erfolgreich gespeichert.
 configuration#:#Konfiguration des Camtasia Plugins

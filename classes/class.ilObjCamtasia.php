@@ -87,6 +87,7 @@ class ilObjCamtasia extends ilObjectPlugin
 			$this->setPlayerFile($rec["player_file"]);
 		}
 	}
+    
 
 	/**
 	 * Update data
@@ -96,7 +97,7 @@ class ilObjCamtasia extends ilObjectPlugin
 		global $ilDB;
 
 		$ilDB->manipulate($up = "UPDATE rep_robj_xcam_data SET ".
-			" http = ".$ilDB->quote($this->gethttp(), "text").",".
+            " http = ".$ilDB->quote($this->gethttp(), "text").",".
             " is_online = ".$ilDB->quote($this->getOnline(), "integer").",".
 			" player_file = ".$ilDB->quote($this->getPlayerFile(), "text").
 			" WHERE id = ".$ilDB->quote($this->getId(), "integer")
@@ -110,12 +111,11 @@ class ilObjCamtasia extends ilObjectPlugin
 		global $ilDB;
 
 		// Delete object
-		$id = $ilDB->quote($this->getId(), 'integer');
-		$ilDB->manipulate("DELETE FROM rep_robj_xcam_data WHERE id = ${id}");
-
+		$ilDB->manipulate("DELETE FROM rep_robj_xcam_data WHERE id = ".
+                $ilDB->quote($this->getId(), "integer")
+        );
 		// Delete content of data-directory
-		$directory = $this->getDataDirectory();
-		ilUtil::delDir($directory);
+		ilUtil::delDir($this->getDataDirectory());
 	}
 
 
@@ -137,18 +137,28 @@ class ilObjCamtasia extends ilObjectPlugin
 		return true;
 	}
 
-	/**
+    /**
 	 * Do Cloning
-	 */
-	function doClone($a_target_id,$a_copy_id,$new_obj)
-	{
-		global $ilDB;
-
-		$new_obj->setOnline($this->getOnline());
-		$new_obj->setPlayerFile($this->getPlayerFile());
-		$new_obj->update();
+	 */    
+    
+    function doCloneObject(ilObjCamtasia $new_obj, $a_target_id, $a_copy_id = 0) {
+        $new_obj->cloneStructure($this->getRefId());
+        //return $new_obj;
 	}
-
+    
+    function cloneStructure($original_id) {
+		$original = new ilObjCamtasia($original_id);
+        ilUtil::rCopy($original->getDataDirectory(), $this->getDataDirectory());
+        $this->sethttp($original->gethttp());
+		$this->setPlayerFile($original->getPlayerFile());
+        $this->setOnline(false); // Copy must be offline
+        $this->doUpdate();
+        
+        // After Cloning forward to $new_obj settings tab        
+        ilUtil::redirect("ilias.php?baseClass=ilObjPluginDispatchGUI&cmd=forward&ref_id=".$this->getRefId()."&forwardCmd=uploadCamtasiaForm2");
+        
+    }
+    
 	    
     function gethttp()
 	{
@@ -241,18 +251,6 @@ class ilObjCamtasia extends ilObjectPlugin
 		if ($rec = $ilDB->fetchAssoc($set))
 		{
 			return $rec["videoserver"];
-		}
-		return null;
-	}
-    
-    function getBackup()
-	{
-		global $ilDB;
-	
-		$set = $ilDB->query("SELECT * FROM rep_robj_xcam_config");
-		if ($rec = $ilDB->fetchAssoc($set))
-		{
-			return $rec["backup"];
 		}
 		return null;
 	}

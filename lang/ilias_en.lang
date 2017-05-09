@@ -16,16 +16,22 @@ xcam_read#:#read access to E-Lecture
 xcam_write#:#write access to E-Lecture
 xcam_delete#:#delete E-Lecture
 xcam_edit_permission#:#edit E-Lecture
+grp_create_xcam#:#Create E-Lecture
+cat_create_xcam#:#Create E-Lecture
+fold_create_xcam#:#Create E-Lecture
+root_create_xcam#:#Create E-Lecture
+crs_create_xcam#:#Create E-Lecture
 
 upload#:#Configuration
 content#:#Content
+export#:#Export
 importCamtasiaAction#:#Save
 edit#:#Edit content
 player_file#:#Startfile
 player_file_info#:#Startfile within the zip archive
 status#:#Status
 offline#:#Offline
-no_record#:#No E-Lecture found! Make sure the uploaded ZIP-File contains a '*_player.html'
+no_record#:#No E-Lecture found!
 file_not_patched#:#No or invalid Camtasia files found after unpacking.
 file_patched#:#E-Lecture successfully created
 no_link#:#Import failed. Please check your input.
@@ -47,8 +53,6 @@ ex_info#:#To serve as an example within the import dialog.
 ex_url#:#Example-URL
 template_file#:#Template file
 tempfile_info#:#Deposit file to "./Camtasia/templates/". Declaration including *.zip.
-enable_backup#:#Save master file
-enable_backup_info#:#If activated, the original zip-archive will be saved as backup.
 no_ttfile#:#Template file invalid.
 config_saved#:#Configuration successfully saved
 configuration#:#Setup Camtasia Plugin

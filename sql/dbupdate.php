@@ -53,3 +53,8 @@ $fields = array(
 );   
 $ilDB->createTable("rep_robj_xcam_config", $fields);
 ?>
+
+<#3>
+<?php
+$ilDB->dropTableColumn("rep_robj_xcam_config", "backup");
+?>

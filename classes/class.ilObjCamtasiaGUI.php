@@ -43,7 +43,7 @@ require_once("./Services/Utilities/classes/class.ilFileUtils.php");
 *   screens) and ilInfoScreenGUI (handles the info screen).
 *
 * @ilCtrl_isCalledBy ilObjCamtasiaGUI: ilRepositoryGUI, ilAdministrationGUI, ilObjPluginDispatchGUI
-* @ilCtrl_Calls ilObjCamtasiaGUI: ilPermissionGUI, ilInfoScreenGUI, ilObjectCopyGUI, ilCommonActionDispatcherGUI
+* @ilCtrl_Calls ilObjCamtasiaGUI: ilPermissionGUI, ilInfoScreenGUI, ilObjectCopyGUI, ilCommonActionDispatcherGUI, ilExportGUI
 *
 *
 */
@@ -56,16 +56,15 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 	{
 		switch ($cmd)
 		{
-			case "importCamtasiaAction":
+			case "importCamtasiaAction": // list all commands that need write permission here
 			case "uploadCamtasiaForm":
             case "uploadCamtasiaForm2":
-			//case "editProperties":		// list all commands that need write permission here
-			//case "updateProperties":
+            case "showExport":
 				$this->checkPermission("write");
 				$this->$cmd();
 				break;
-
-			case "showContent":			// list all commands that need read permission here
+           
+			case "showContent":	// list all commands that need read permission here
 				$this->checkPermission("read");
 				$this->$cmd();
 				break;
@@ -213,7 +212,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
         $upl->addSubItem($si);
          
         $in_file = new ilFileInputGUI($this->txt("upload_file"), "upload_file");
-        //$in_file->setRequired(tru e); // conflict with file_switch
+        //$in_file->setRequired(true); // conflict with file_switch
         $in_file->setSuffixes(array("zip", "ZIP"));
         $in_file->setAllowDeletion(true); 
         $upl->addSubItem($in_file);
@@ -224,12 +223,12 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
     
 	public function importCamtasiaAction()
 	{
-		global $tpl;
+		global $ilErr, $tpl;
         
         // create permission is already checked in createObject. This check here is done to prevent hacking attempts
-		if (!$this->checkPermissionBool("create", "", $this->getType()))
+		if (!$this->checkPermissionBool("write", "", $this->getType()))
 		{
-			$this->ilias->raiseError($this->txt("no_create_permission"));
+			$ilErr->raiseError($this->txt("no_create_permission"));
 		}
         
         $this->initImportForm($a_new_import);
@@ -362,10 +361,8 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		$filename= $_FILES["upload_file"]["name"];
 		ilUtil::moveUploadedFile($temp_name, $filename, $tmpdir . "/" . $filename);
 		ilUtil::unzip($tmpdir."/".$filename);
-		//need Backup?
-        if ($this->object->getBackup() == false)  {
-            unlink($tmpdir."/".$filename); }
-		return $tmpdir;
+		unlink($tmpdir."/".$filename);
+        return $tmpdir;
 	}
     
         private function extractToTemporaryDirTemplate()
@@ -377,9 +374,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
         $temp_name = substr($_SERVER['SCRIPT_FILENAME'], 0, -10). "/Customizing/global/plugins/Services/Repository/RepositoryObject/Camtasia/templates/".$filename;;
 		copy($temp_name, $tmpdir."/".$filename);
 		ilUtil::unzip($tmpdir."/".$filename);
-        //need Backup?
-        if ($this->object->getBackup() == false)  {
-            unlink($tmpdir."/".$filename); }
+        unlink($tmpdir."/".$filename);
         return $tmpdir;
     }
    
@@ -399,16 +394,22 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		// tab for the "show content" command
 		if ($ilAccess->checkAccess("read", "", $this->object->getRefId()))
 		{
-			$ilTabs->addTab("content", $this->txt("content"), $ilCtrl->getLinkTarget($this, "showContent"), '_blank');
+			$ilTabs->addNonTabbedLink("content", $this->txt("content"), $ilCtrl->getLinkTarget($this, "showContent"), '_blank');
 		}
 
-		// standard info screen tab
-		$this->addInfoTab();
-
-		// settings tab
+		// settings tab with write permission
 		if ($ilAccess->checkAccess("write", "", $this->object->getRefId()))
 		{
 			$ilTabs->addTab("upload", $this->txt('upload'), $ilCtrl->getLinkTarget($this, "uploadCamtasiaForm2"));
+        }
+            
+        // standard info screen tab
+		$this->addInfoTab();
+
+		//  export tab with write permission
+		if ($ilAccess->checkAccess("write", "", $this->object->getRefId()))
+		{
+            $ilTabs->addTab("export", $this->txt("export"), $ilCtrl->getLinkTargetByClass("ilexportgui", ""));
 		}
 
 		// standard epermission tab
@@ -492,13 +493,78 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		if ($playerFile != "")
 		{
 			$playerFileFullPath = $this->object->getDataDirectory().'/'.$playerFile;
-            ilUtil::redirect($playerFileFullPath);
+            ilUtil::redirect($playerFileFullPath); 
 		} else {
 			$ilTabs->activateTab("content");
             ilUtil::sendFailure($this->txt("no_record"));
 		}
-
 	}
+    
+    protected function showExport() 
+    {	
+        require_once("./Services/Export/classes/class.ilExportGUI.php");
+		$export = new ilExportGUI($this);
+		$export->addFormat("html", "", $this, "exportHTML");
+		$ret = $this->ctrl->forwardCommand($export);
+	}
+    
+    /**
+	 * Export content
+	 */ 
+    public function executeCommand() 
+    {
+		global $ilTabs, $tpl;
+		
+        $next_class = $this->ctrl->getNextClass($this);
+		switch ($next_class) {
+			case 'ilexportgui':
+				$tpl->setTitle($this->object->getTitle());;
+				$tpl->setTitleIcon(ilObject::_getIcon($this->object->getId()));
+				$this->setLocator();
+				$tpl->getStandardTemplate();
+				$this->setTabs();
+				include_once './Services/Export/classes/class.ilExportGUI.php';
+				$ilTabs->activateTab("export");
+				$exp = new ilExportGUI($this);
+				//$exp->addFormat('xml'); // no need for xml export
+                $exp->addFormat("html", "", $this, "exportHTML");
+				$this->ctrl->forwardCommand($exp);
+				$tpl->show();
+				return;
+				break;
+		}
+		$return_value = parent::executeCommand();
+		return $return_value;
+	}
+    
+    /**
+	 * create html package
+	 */
+	function exportHTML()
+	{
+		$inst_id = IL_INST_ID;
+		include_once("./Services/Export/classes/class.ilExport.php");
+		
+		ilExport::_createExportDirectory($this->object->getId(), "html",
+			$this->object->getType());
+		$export_dir = ilExport::_getExportDirectory($this->object->getId(), "html",
+			$this->object->getType());
+		
+		$subdir = $this->object->getType()."_".$this->object->getId();
+		$filename = $this->subdir.".zip";
+		$target_dir = $export_dir."/".$subdir;
+		ilUtil::delDir($target_dir);
+		ilUtil::makeDir($target_dir);
+		$source_dir = $this->object->getDataDirectory();
+		ilUtil::rCopy($source_dir, $target_dir);
+		// zip it all
+		$date = time();
+		$zip_file = $export_dir."/".$date."__".IL_INST_ID."__".
+			$this->object->getType()."_".$this->object->getId().".zip";
+		ilUtil::zip($target_dir, $zip_file);
+		ilUtil::delDir($target_dir);
+	}
+
 
 	private function patchFile($file, $old, $new)
 	{
