@@ -25,6 +25,7 @@
 require_once("./Services/Repository/classes/class.ilObjectPluginGUI.php");
 require_once("./Modules/File/classes/class.ilObjFileGUI.php");
 require_once("./Services/Form/classes/class.ilFileInputGUI.php");
+require_once("./Services/Utilities/classes/class.ilFileUtils.php");
 
 /**
 * User Interface class for the camtasia repository object.
@@ -269,7 +270,6 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
         $this->plugin->includeClass('class.ilObjCamtasia.php');
 		$newObj = new ilObjCamtasia($this->object->getRefId());
 		if ($newObj->doExist()==false) {
-			//$newObj->setOnline(1);
 			$newObj->doCreate();
 		} else {
 			$newObj->doRead();
@@ -280,83 +280,70 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
         $newObj->setOnline($online);
         ilUtil::delDir($tempdir);
         
-		// Auto-detect startfile
-        $startSuffix = ".html";
-		$files = array();
-		include_once "Services/Utilities/classes/class.ilFileUtils.php";
-		ilFileUtils::recursive_dirscan($newObj->getDataDirectory(), $files);
-		if (is_array($files["file"])) {
-			foreach($files["file"] as $idx => $file){
+        // Auto-detect startfile
+        $startSuffix = "_player.html";
+	    $files = array();
+        ilFileUtils::recursive_dirscan($newObj->getDataDirectory(), $files);
+		    if (is_array($files["file"])) {
+			  foreach($files["file"] as $idx => $file){
 				$chk_file = null;
 				if ($this->endsWith($file, $startSuffix)){
-					$newObj->setPlayerFile(str_replace($newObj->getDataDirectory()."/", "", $files["path"][$idx]).$file);
-                    $newObj->doUpdate();
-					break;
-				}
-			} // for each
-		} // files found */
+					$newObj->setPlayerFile(str_replace($newObj->getDataDirectory()."/", "", $files["path"][$idx]).substr($file, 0, strlen($file) - 12).".html");
+					break;}}}        
         
         // no content-menu
-        $playerSuffix = "_player.html";
-        $files = array();
-		include_once "Services/Utilities/classes/class.ilFileUtils.php";
-		ilFileUtils::recursive_dirscan($newObj->getDataDirectory(), $files);
-		if (is_array($files["file"])) {
-			foreach($files["file"] as $idx => $file){
+        $nomenuSuffix = "_player.html";
+        $click= 'id="tscVideoContent"';
+        $noclick= 'id="tscVideoContent" oncontextmenu="return false"';
+	    $files = array();
+        ilFileUtils::recursive_dirscan($newObj->getDataDirectory(), $files);
+		    if (is_array($files["file"])) {
+			  foreach($files["file"] as $idx => $file){
 				$chk_file = null;
-				if ($this->endsWith($file, $playerSuffix)){
-					$patchfile = $files["path"][$idx].$file;
-                    $click= 'id="tscVideoContent"';
-                    $noclick= 'id="tscVideoContent" oncontextmenu="return false"';
-                    $this->patchFile($patchfile, $click, $noclick);
-                    break;
-				}
-			} // for each
-		} // files found
+				if ($this->endsWith($file, $nomenuSuffix)){
+					$this->patchFile($files["path"][$idx].$file, $click, $noclick);
+					break;}}}
         
         // one title for all
-        $titleSuffix = ".html";
-        $files = array();
-		include_once "Services/Utilities/classes/class.ilFileUtils.php";
-		ilFileUtils::recursive_dirscan($newObj->getDataDirectory(), $files);
-		if (is_array($files["file"])) {
-			foreach($files["file"] as $idx => $file){
+        $titleSuffix = "_player.html";
+        $start = '<title>';
+        $end  = '</title>';
+	    $files = array();
+        ilFileUtils::recursive_dirscan($newObj->getDataDirectory(), $files);
+		    if (is_array($files["file"])) {
+			  foreach($files["file"] as $idx => $file){
 				$chk_file = null;
 				if ($this->endsWith($file, $titleSuffix)){
-					$patchfile = $files["path"][$idx].$file;
-                    $start = '<title>';
-                    $end  = '</title>';
-                    $this->patchFileBetween($patchfile, $start, $end, $this->object->getTitle());
-                    break;
-				}
-			} // for each
-		} // files found
-        
+					$this->patchFileBetween($files["path"][$idx].substr($file, 0, strlen($file) - 12).".html", $start, $end, $this->object->getTitle());
+                    break;}}}  
+
         // replace http-stream for mp4
-            $streamSuffix = "_config.xml";
-            $start = '<rdf:li xmpDM:name="0" xmpDM:value="';
-            $end  = '"/>';
-	     	$files = array();
-		    ilFileUtils::recursive_dirscan($newObj->getDataDirectory(), $files);
+        $streamSuffix = "_config.xml";
+        $start = '<rdf:li xmpDM:name="0" xmpDM:value="';
+        $end  = '"/>';
+        $files = array();
+        ilFileUtils::recursive_dirscan($newObj->getDataDirectory(), $files);
 		    if (is_array($files["file"])) {
 			  foreach($files["file"] as $idx => $file){
 				$chk_file = null;
 				if ($this->endsWith($file, $streamSuffix)){
 					$this->patchFileBetween($files["path"][$idx].$file, $start, $end, $stream);
 					break;}}}            
-            $streamSuffix2 = "_player.html";
-            $start = 'TSC.playerConfiguration.addMediaSrc("';
-            $end  = '");';
-	     	$files = array();
-		    ilFileUtils::recursive_dirscan($newObj->getDataDirectory($cam_dir), $files);
+        $streamSuffix2 = "_player.html";
+        $start = 'TSC.playerConfiguration.addMediaSrc("';
+        $end  = '");';
+        $files = array();
+        ilFileUtils::recursive_dirscan($newObj->getDataDirectory(), $files);
 		    if (is_array($files["file"])) {
 			  foreach($files["file"] as $idx => $file){
 				$chk_file = null;
 				if ($this->endsWith($file, $streamSuffix2)){
 					$this->patchFileBetween($files["path"][$idx].$file, $start, $end, $stream);
 					break;}}}
-
-		// are this camtasia files?
+        
+        $newObj->doUpdate();
+		
+        // are this camtasia files?
             if ($newObj->getPlayerFile() != "")
                 { ilUtil::sendSuccess($this->txt("file_patched"), true); }
             else
@@ -387,7 +374,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		$tmpdir = ilUtil::ilTempnam();
 		ilUtil::makeDir($tmpdir);
         $filename= $this->object->getTempfile();
-        $temp_name = substr($_SERVER['SCRIPT_FILENAME'], 0, -10). "/Customizing/global/plugins/Services/Repository/RepositoryObject/camtasia/templates/".$filename;;
+        $temp_name = substr($_SERVER['SCRIPT_FILENAME'], 0, -10). "/Customizing/global/plugins/Services/Repository/RepositoryObject/Camtasia/templates/".$filename;;
 		copy($temp_name, $tmpdir."/".$filename);
 		ilUtil::unzip($tmpdir."/".$filename);
         //need Backup?
@@ -467,25 +454,20 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 			$this->object->setTitle($this->form->getInput("title"));
 			$this->object->setDescription($this->form->getInput("desc"));
 			$this->object->setPlayerFile($this->form->getInput("playerfile"));
-            $this->object->sethttp($this->form->getInput("http")); //update stream only with new file
-                    
+            //$this->object->sethttp($this->form->getInput("http")); //update stream only with new file
+            
             // one title for all
-            $titleSuffix = ".html";
-            $files = array();
-		    include_once "Services/Utilities/classes/class.ilFileUtils.php";
-            ilFileUtils::recursive_dirscan($this->object->getDataDirectory(), $files);
+            $titleSuffix = "_player.html";
+            $start = '<title>';
+            $end  = '</title>';
+	     	$files = array();
+		    ilFileUtils::recursive_dirscan($this->object->getDataDirectory(), $files);
 		    if (is_array($files["file"])) {
-			foreach($files["file"] as $idx => $file){
+			  foreach($files["file"] as $idx => $file){
 				$chk_file = null;
 				if ($this->endsWith($file, $titleSuffix)){
-					$patchfile = $files["path"][$idx].$file;
-                    $start = '<title>';
-                    $end  = '</title>';
-                    $this->patchFileBetween($patchfile, $start, $end, $this->object->getTitle());
-                    break;
-				}
-			 } // for each
-            } // files found
+					$this->patchFileBetween($files["path"][$idx].substr($file, 0, strlen($file) - 12).".html", $start, $end, $this->object->getTitle());
+                    break;}}}
             
 			$this->object->setOnline($this->form->getInput("online"));
 			$this->object->update();
