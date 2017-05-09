@@ -1,0 +1,54 @@
+obj_xcam#:#E-Lecture
+objs_xcam#:#E-Lectures
+xcam_new#:#Create new E-Lecture
+objs_xcam_duplicate#:#Copy E-Lecture
+xcam_add#:#Create E-Lecture
+new_camtasia#:#Configuration
+
+title#:#Title
+description#:#Description
+upload_file#:#File
+cancel#:#Cancel
+no_create_permission#:#no create permission
+
+xcam_visible#:#E-Lecture is visible
+xcam_read#:#read access to E-Lecture
+xcam_write#:#write access to E-Lecture
+xcam_delete#:#delete E-Lecture
+xcam_edit_permission#:#edit E-Lecture
+
+upload#:#Configuration
+content#:#Content
+importCamtasiaAction#:#Save
+edit#:#Edit content
+player_file#:#Startfile
+player_file_info#:#Startfile within the zip archive
+status#:#Status
+offline#:#Offline
+no_record#:#No E-Lecture found! Make sure the uploaded ZIP-File contains a '*_player.html'
+file_not_patched#:#No or invalid Camtasia files found after unpacking.
+file_patched#:#E-Lecture successfully created
+no_link#:#Import failed. Please check your input.
+
+new_file_title#:#Upload new E-Lecture
+limitations#:#Attention: Upload TechSmith Camtasia Zip-Archives only. An existing record is replaced.
+newfileform#:#Activate
+http#:#HTTP-Stream
+stream#:#HTTP-Stream
+filesw#:#Type
+tafel_template#:#table recording
+new_file#:#slide recording
+stream_info#:#Example:
+template_info#:#is used as template.
+
+videoserver_url#:#URL
+videoserver_info#:#Only this url is accepted as media stream.
+ex_info#:#To serve as an example within the import dialog.
+ex_url#:#Example-URL
+template_file#:#Template file
+tempfile_info#:#Deposit file to "./Camtasia/templates/". Declaration including *.zip.
+enable_backup#:#Save master file
+enable_backup_info#:#If activated, the original zip-archive will be saved as backup.
+no_ttfile#:#Template file invalid.
+config_saved#:#Configuration successfully saved
+configuration#:#Setup Camtasia Plugin
