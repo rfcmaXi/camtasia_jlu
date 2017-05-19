@@ -1,26 +1,4 @@
 <?php
-/*
-	+-----------------------------------------------------------------------------+
-	| ILIAS open source                                                           |
-	+-----------------------------------------------------------------------------+
-	| Copyright (c) 1998-2009 ILIAS open source, University of Cologne            |
-	|                                                                             |
-	| This program is free software; you can redistribute it and/or               |
-	| modify it under the terms of the GNU General Public License                 |
-	| as published by the Free Software Foundation; either version 2              |
-	| of the License, or (at your option) any later version.                      |
-	|                                                                             |
-	| This program is distributed in the hope that it will be useful,             |
-	| but WITHOUT ANY WARRANTY; without even the implied warranty of              |
-	| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               |
-	| GNU General Public License for more details.                                |
-	|                                                                             |
-	| You should have received a copy of the GNU General Public License           |
-	| along with this program; if not, write to the Free Software                 |
-	| Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA. |
-	+-----------------------------------------------------------------------------+
-*/
-
 include_once("./Services/Repository/classes/class.ilObjectPlugin.php");
 
 /**
@@ -60,15 +38,121 @@ class ilObjCamtasia extends ilObjectPlugin
 	function doCreate()
 	{
 		global $ilDB;
-
-		$ilDB->manipulate("INSERT INTO rep_robj_xcam_data ".
+        
+        // Clone-Mode
+        if (!isset($_POST['stream'])) {
+            $ilDB->manipulate("INSERT INTO rep_robj_xcam_data ".
 			"(id, http, is_online, player_file) VALUES (".
 			$ilDB->quote($this->getId(), "integer").",".
 			$ilDB->quote("x", "text").",".
             $ilDB->quote(0, "integer").",".
 			$ilDB->quote("x", "text").
 			")");
-	}
+           return;
+        }
+
+        // Create-Mode if stream is correct
+		$server = $this->getVideoserver();
+        if (preg_match("#$server#", $_POST['stream'])) {
+        
+        $ilDB->manipulate("INSERT INTO rep_robj_xcam_data ".
+			"(id, http, is_online, player_file) VALUES (".
+			$ilDB->quote($this->getId(), "integer").",".
+			$ilDB->quote("x", "text").",".
+            $ilDB->quote(0, "integer").",".
+			$ilDB->quote("x", "text").
+			")");
+        
+        // Import content
+        // template or new zip?
+        if ($_POST['filesw'] == "new_file") { 
+            $tempdir = $this->extractToTemporaryDir(); }
+        if ($_POST['filesw'] == "tafel_template"){
+            $tempdir = $this->extractToTemporaryDirTemplate(); }
+        $this->populateByDirectory($tempdir);
+		ilUtil::delDir($tempdir);
+        
+        $this->sethttp($_POST['stream']);
+        $this->setOnline($_POST['online']);
+        
+        // Auto-detect startfile
+        $startSuffix = "_player.html";
+	    $files = array();
+        ilFileUtils::recursive_dirscan($this->getDataDirectory(), $files);
+		    if (is_array($files["file"])) {
+			  foreach($files["file"] as $idx => $file){
+				$chk_file = null;
+				if ($this->endsWith($file, $startSuffix)){
+					$this->setPlayerFile(str_replace($this->getDataDirectory()."/", "", $files["path"][$idx]).substr($file, 0, strlen($file) - 12).".html");
+					break;}}}        
+        // no right-click
+        $nomenuSuffix = "_player.html";
+        $click= 'id="tscVideoContent"';
+        $noclick= 'id="tscVideoContent" oncontextmenu="return false"';
+	    $files = array();
+        ilFileUtils::recursive_dirscan($this->getDataDirectory(), $files);
+		    if (is_array($files["file"])) {
+			  foreach($files["file"] as $idx => $file){
+				$chk_file = null;
+				if ($this->endsWith($file, $nomenuSuffix)){
+					$this->patchFile($files["path"][$idx].$file, $click, $noclick);
+					break;}}}
+        // one title for all
+        $titleSuffix = "_player.html";
+        $start = '<title>';
+        $end  = '</title>';
+	    $files = array();
+        ilFileUtils::recursive_dirscan($this->getDataDirectory(), $files);
+		    if (is_array($files["file"])) {
+			  foreach($files["file"] as $idx => $file){
+				$chk_file = null;
+				if ($this->endsWith($file, $titleSuffix)){
+					$this->patchFileBetween($files["path"][$idx].substr($file, 0, strlen($file) - 12).".html", $start, $end, $this->getTitle());
+                    break;}}}  
+        // replace http-stream for mp4
+        $streamSuffix = "_config.xml";
+        $start = '<rdf:li xmpDM:name="0" xmpDM:value="';
+        $end  = '"/>';
+        $files = array();
+        ilFileUtils::recursive_dirscan($this->getDataDirectory(), $files);
+		    if (is_array($files["file"])) {
+			  foreach($files["file"] as $idx => $file){
+				$chk_file = null;
+				if ($this->endsWith($file, $streamSuffix)){
+					$this->patchFileBetween($files["path"][$idx].$file, $start, $end, $this->gethttp());
+					break;}}}            
+        $streamSuffix2 = "_player.html";
+        $start = 'TSC.playerConfiguration.addMediaSrc("';
+        $end  = '");';
+        $files = array();
+        ilFileUtils::recursive_dirscan($this->getDataDirectory(), $files);
+		    if (is_array($files["file"])) {
+			  foreach($files["file"] as $idx => $file){
+				$chk_file = null;
+				if ($this->endsWith($file, $streamSuffix2)){
+					$this->patchFileBetween($files["path"][$idx].$file, $start, $end, $this->gethttp());
+					break;}}}
+        
+        $this->doUpdate();
+        // are this camtasia files?
+        if ($this->getPlayerFile() != "")
+            { ilUtil::sendSuccess($this->txt("file_patched"), true); }
+        else
+            { ilUtil::sendFailure($this->txt("file_not_patched"), true); }
+        return;
+        }
+        
+        // Error if stream is not correct
+		else
+        {
+        ilUtil::sendFailure($this->txt("no_link"), true);
+        // very urgly redirect
+        //$id = strstr($_SERVER['QUERY_STRING'], "&", true);
+        //$id2 = $_SERVER['QUERY_STRING'];
+        //$url = "ilias.php?baseClass=ilRepositoryGUI&".$id."&cmd=create&new_type=xcam";
+        ilUtil::redirect($_SERVER['HTTP_REFERER']);
+        }   
+}
 
 	/**
 	 * Read data from db
@@ -88,8 +172,7 @@ class ilObjCamtasia extends ilObjectPlugin
 		}
 	}
     
-
-	/**
+    /**
 	 * Update data
 	 */
 	function doUpdate()
@@ -155,10 +238,15 @@ class ilObjCamtasia extends ilObjectPlugin
         $this->doUpdate();
         
         // After Cloning forward to $new_obj settings tab        
-        ilUtil::redirect("ilias.php?baseClass=ilObjPluginDispatchGUI&cmd=forward&ref_id=".$this->getRefId()."&forwardCmd=uploadCamtasiaForm2");
+        ilUtil::sendSuccess($this->txt("copy_successful"), true);
+        ilUtil::redirect("ilias.php?baseClass=ilObjPluginDispatchGUI&cmd=forward&ref_id=".$this->getRefId()."&forwardCmd=uploadCamtasiaForm");
+        
         
     }
-    
+   
+    /**
+	 * Setter and Getter
+	 */ 
 	    
     function gethttp()
 	{
@@ -207,18 +295,6 @@ class ilObjCamtasia extends ilObjectPlugin
 		return $cam_dir;
 	}
 
-	/**
-	 * Populate by directory. Copy file from the temp ($a_dir) folder to the public web folder.
-	 *
-	 * @param
-	 * @return
-	 */
-	function populateByDirectory($a_dir)
-	{
-		ilUtil::rCopy($a_dir, $this->getDataDirectory());
-		ilUtil::renameExecutables($this->getDataDirectory());
-	}
-    
     function getTempfile()
 	{
 		global $ilDB;
@@ -255,5 +331,53 @@ class ilObjCamtasia extends ilObjectPlugin
 		return null;
 	}
     
+    function populateByDirectory($a_dir)
+	{
+		ilUtil::rCopy($a_dir, $this->getDataDirectory());
+		ilUtil::renameExecutables($this->getDataDirectory());
+	}
+    
+    public function extractToTemporaryDir()
+	{
+		$tmpdir = ilUtil::ilTempnam();
+		ilUtil::makeDir($tmpdir);
+		$temp_name = $_FILES["upload_file"]["tmp_name"];
+		$filename= $_FILES["upload_file"]["name"];
+		ilUtil::moveUploadedFile($temp_name, $filename, $tmpdir . "/" . $filename);
+		ilUtil::unzip($tmpdir."/".$filename);
+		unlink($tmpdir."/".$filename);
+        return $tmpdir;
+	}
+    
+    public function extractToTemporaryDirTemplate()
+	{	
+		$tmpdir = ilUtil::ilTempnam();
+		ilUtil::makeDir($tmpdir);
+        $filename= $this->getTempfile();
+        $temp_name = substr($_SERVER['SCRIPT_FILENAME'], 0, -10). "/Customizing/global/plugins/Services/Repository/RepositoryObject/Camtasia/templates/".$filename;;
+		copy($temp_name, $tmpdir."/".$filename);
+		ilUtil::unzip($tmpdir."/".$filename);
+        unlink($tmpdir."/".$filename);
+        return $tmpdir;
+    }
+   
+	public function endsWith($haystack, $needle) {
+		// search forward starting from end minus needle length characters
+		return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== false);
+	}
+    
+    public function patchFile($file, $old, $new) {
+		if (is_file($file)) {
+			$content = file_get_contents($file);
+			$content = str_replace($old, $new, $content);
+			file_put_contents($file, $content); }
+	}
+    
+    public function patchFileBetween($file, $start, $end, $new) {
+		if (is_file($file)) {
+			$content = file_get_contents($file);
+			$content = preg_replace('#('.preg_quote($start).')(.*?)('.preg_quote($end).')#si', '$1'.$new.'$3', $content);
+			file_put_contents($file, $content);}
+	} 
 }
 ?>

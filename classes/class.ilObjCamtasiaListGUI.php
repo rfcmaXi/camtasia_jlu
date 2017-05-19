@@ -42,7 +42,7 @@ class ilObjCamtasiaListGUI extends ilObjectPluginListGUI
                 "default" => true),
             array(
                 "permission" => "write",
-                "cmd" => "uploadCamtasiaForm2",
+                "cmd" => "uploadCamtasiaForm",
                 "txt" => $this->txt("edit"),
                 "default" => false),
         );

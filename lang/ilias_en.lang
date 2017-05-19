@@ -39,10 +39,12 @@ offline#:#Offline
 no_record#:#No E-Lecture found!
 file_not_patched#:#No or invalid Camtasia files found after unpacking.
 file_patched#:#E-Lecture successfully created
-no_link#:#Import failed. Please check your input.
+no_link#:#The input of the HTTP stream was invalid. The form has been reinitialized.
+copy_successful#:#Object copied
 <!-- -->
 new_file_title#:#Upload new E-Lecture
-limitations#:#Attention: Upload TechSmith Camtasia Zip-Archives only. An existing record is replaced.
+limitations#:#Attention: Upload TechSmith Camtasia Zip-Archives only.
+limitations2#:#Attention: Upload TechSmith Camtasia Zip-Archives only. The existing record will be replaced.
 newfileform#:#Activate
 http#:#HTTP-Stream
 stream#:#HTTP-Stream

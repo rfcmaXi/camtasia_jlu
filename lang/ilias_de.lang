@@ -39,10 +39,12 @@ offline#:#Offline
 no_record#:#Keine E-Lecture gefunden!
 file_not_patched#:#Keine oder fehlerhafte Camtasia-Dateien nach Entpacken gefunden.
 file_patched#:#E-Lecture erfolgreich hochgeladen.
-no_link#:#Eingaben nicht korrekt.
+no_link#:#Die Eingabe des Http-Streams war ungültig. Das Formular wurde neu initialisiert.
+copy_successful#:#Objekt kopiert
 <!-- -->
 new_file_title#:#Neue E-Lecture hochladen
-limitations#:#Achtung: Nur TechSmith Camtasia Zip-Archive hochladen. Eine existierende Aufzeichnung wird ersetzt.
+limitations#:#Achtung: Nur TechSmith Camtasia Zip-Archive hochladen.
+limitations2#:#Achtung: Nur TechSmith Camtasia Zip-Archive hochladen. Die existierende Aufzeichnung wird ersetzt.
 newfileform#:#Aktivieren
 http#:#HTTP-Stream
 stream#:#HTTP-Stream

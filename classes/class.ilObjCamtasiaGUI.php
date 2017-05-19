@@ -1,27 +1,4 @@
 <?php
-/*
-	+-----------------------------------------------------------------------------+
-	| ILIAS open source                                                           |
-	+-----------------------------------------------------------------------------+
-	| Copyright (c) 1998-2009 ILIAS open source, University of Cologne            |
-	|                                                                             |
-	| This program is free software; you can redistribute it and/or               |
-	| modify it under the terms of the GNU General Public License                 |
-	| as published by the Free Software Foundation; either version 2              |
-	| of the License, or (at your option) any later version.                      |
-	|                                                                             |
-	| This program is distributed in the hope that it will be useful,             |
-	| but WITHOUT ANY WARRANTY; without even the implied warranty of              |
-	| MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the               |
-	| GNU General Public License for more details.                                |
-	|                                                                             |
-	| You should have received a copy of the GNU General Public License           |
-	| along with this program; if not, write to the Free Software                 |
-	| Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA. |
-	+-----------------------------------------------------------------------------+
-*/
-
-
 require_once("./Services/Repository/classes/class.ilObjectPluginGUI.php");
 require_once("./Modules/File/classes/class.ilObjFileGUI.php");
 require_once("./Services/Form/classes/class.ilFileInputGUI.php");
@@ -54,12 +31,14 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 	*/
 	function performCommand($cmd)
 	{
-		switch ($cmd)
+		$this->setTitleAndDescription();
+        switch ($cmd)
 		{
 			case "importCamtasiaAction": // list all commands that need write permission here
 			case "uploadCamtasiaForm":
-            case "uploadCamtasiaForm2":
-            case "showExport":
+            case "initImportForm":
+            case "ilexportgui":
+            case "exportHTML":
 				$this->checkPermission("write");
 				$this->$cmd();
 				break;
@@ -104,6 +83,63 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		return "xcam";
 	}
 
+     /**
+	 * @param string $type
+	 * @return array
+	 */
+    protected function initCreationForms($type)
+	{
+		return array(
+			self::CFORM_NEW => $this->initCreateForm($type)
+		);
+	}
+
+		/**
+	 * @param string $type
+	 * @return ilPropertyFormGUI
+	 */
+    	public function  initCreateForm($type)
+	{
+		$form = parent::initCreateForm($type);
+        $this->plugin->includeClass('class.ilObjCamtasia.php');
+        
+        // Send additional information
+        $form->setDescription($this->txt('limitations'));
+        
+        //Instant Online
+        $online = new ilCheckboxInputGUI($this->lng->txt('online'), 'online');
+		$form->addItem($online);
+        
+        // Http-Stream
+		$ht = new ilTextInputGUI($this->txt("stream"), "stream");
+        $ht->setMaxLength(128);
+        $ht->setSize(40);
+        $ht->setRequired(true);
+        //Example URL
+        $ht->setInfo($this->txt("stream_info") . " " . ilObjCamtasia::getEXURL());
+		$form->addItem($ht);  
+        
+        // Template or new Zip?
+        $si = new ilRadioGroupInputGUI($this->txt("filesw"), "filesw");
+        $si->setRequired(true);
+        
+        $si2 = new ilRadioOption($this->txt("new_file"), "new_file");
+        $in_file = new ilFileInputGUI($this->txt("upload_file"), "upload_file");
+        $in_file->setRequired(true);
+        $in_file->setSuffixes(array("zip", "ZIP"));
+        $si2->addSubItem($in_file);
+        $si->addOption($si2);
+        
+        $tt = new ilRadioOption($this->txt("tafel_template"), "tafel_template");
+        $tt->setInfo(ilObjCamtasia::getTempfile() . " " . $this->txt("template_info"));
+        $si->addOption($tt);
+        $si->setValue("new_file");
+        $form->addItem($si);
+        
+        return $form;
+    }
+    
+
 	/**
 	* Upload CamtasiaZipFile. This commands uses the form class to display an input form.
 	*/
@@ -112,20 +148,9 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		global $tpl, $ilTabs;
 		$ilTabs->activateTab("upload");
         $this->initImportForm($this->getType());
-        //$this->getPropertiesValues();
-        $this->getStartValues();
+        $this->getPropertiesValues();
 		$tpl->setContent($this->form->getHTML());
 	}
-    
-  	function uploadCamtasiaForm2()
-	{
-		global $tpl, $ilTabs;
-		$ilTabs->activateTab("upload");
-        $this->initImportForm($this->getType());
-        $this->getPropertiesValues();
-        //$this->getStartValues();
-		$tpl->setContent($this->form->getHTML());
-	}  
 
 	protected function initImportForm($a_new_type)
 	{
@@ -135,7 +160,6 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		$form_gui = new ilPropertyFormGUI();
         $form_gui->setTitle($this->txt("new_Camtasia"));
 		//$form_gui->setMultipart(TRUE);
-		//$form_gui->setDescription($this->txt("limitations"));
 		
         // title
         $tt = new ilTextInputGUI($this->txt("title"), "title");
@@ -168,7 +192,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		
 		// Buttons
         $form_gui->addCommandButton("importCamtasiaAction", $this->txt("importCamtasiaAction"));
-		//$form_gui->addCommandButton("cancel", $this->txt("cancel")); /no need
+		//$form_gui->addCommandButton("cancel", $this->txt("cancel")); //no need
 		
 		$form_gui->setFormAction($this->ctrl->getFormAction($this, "importCamtasiaAction"));
 
@@ -185,13 +209,13 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
      {   
         $header_tr = new ilFormSectionHeaderGUI();
 		$header_tr->setTitle($this->txt('new_file_title'));
-        $header_tr->setInfo($this->txt("limitations"));
+        $header_tr->setInfo($this->txt("limitations2"));
 		$form_gui->addItem($header_tr);
          
-         // new upload
+        // new upload
 		$upl = new ilCheckboxInputGUI($this->txt("newfileform"), "newfile");
          
-         // Http-Stream
+        // Http-Stream
 		$ht = new ilTextInputGUI($this->txt("stream"), "stream");
         $ht->setMaxLength(128);
         $ht->setSize(40);
@@ -250,29 +274,23 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
         }  
             ilUtil::sendFailure($this->txt("no_link"), true);
             $this->form->setValuesByPost();
-		    $tpl->setContent($this->form->getHtml());
-            //$this->ctrl->redirect($this, "uploadCamtasiaForm2");    
+		    $tpl->setContent($this->form->getHtml());  
     }
 
 	private function importAsXCAMModule($stream, $filesw, $online)
-	{
+	{   
         // cleanup
         $data = $this->object->getDataDirectory('local');
         ilUtil::delDir($data);
          
         // template or new zip?   
             if ($filesw == "new_file") { 
-                $tempdir = $this->extractToTemporaryDir(); }
+                $tempdir = $this->object->extractToTemporaryDir(); }
             if ($filesw == "tafel_template"){
-                $tempdir = $this->extractToTemporaryDirTemplate(); }
+                $tempdir = $this->object->extractToTemporaryDirTemplate(); }
 
-        $this->plugin->includeClass('class.ilObjCamtasia.php');
+        //$this->plugin->includeClass('class.ilObjCamtasia.php');
 		$newObj = new ilObjCamtasia($this->object->getRefId());
-		if ($newObj->doExist()==false) {
-			$newObj->doCreate();
-		} else {
-			$newObj->doRead();
-		}
         
         $newObj->populateByDirectory($tempdir);
 		$newObj->sethttp($stream);
@@ -286,10 +304,9 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		    if (is_array($files["file"])) {
 			  foreach($files["file"] as $idx => $file){
 				$chk_file = null;
-				if ($this->endsWith($file, $startSuffix)){
+				if ($this->object->endsWith($file, $startSuffix)){
 					$newObj->setPlayerFile(str_replace($newObj->getDataDirectory()."/", "", $files["path"][$idx]).substr($file, 0, strlen($file) - 12).".html");
 					break;}}}        
-        
         // no content-menu
         $nomenuSuffix = "_player.html";
         $click= 'id="tscVideoContent"';
@@ -299,10 +316,9 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		    if (is_array($files["file"])) {
 			  foreach($files["file"] as $idx => $file){
 				$chk_file = null;
-				if ($this->endsWith($file, $nomenuSuffix)){
-					$this->patchFile($files["path"][$idx].$file, $click, $noclick);
+				if ($this->object->endsWith($file, $nomenuSuffix)){
+					$this->object->patchFile($files["path"][$idx].$file, $click, $noclick);
 					break;}}}
-        
         // one title for all
         $titleSuffix = "_player.html";
         $start = '<title>';
@@ -312,10 +328,9 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		    if (is_array($files["file"])) {
 			  foreach($files["file"] as $idx => $file){
 				$chk_file = null;
-				if ($this->endsWith($file, $titleSuffix)){
-					$this->patchFileBetween($files["path"][$idx].substr($file, 0, strlen($file) - 12).".html", $start, $end, $this->object->getTitle());
+				if ($this->object->endsWith($file, $titleSuffix)){
+					$this->object->patchFileBetween($files["path"][$idx].substr($file, 0, strlen($file) - 12).".html", $start, $end, $this->object->getTitle());
                     break;}}}  
-
         // replace http-stream for mp4
         $streamSuffix = "_config.xml";
         $start = '<rdf:li xmpDM:name="0" xmpDM:value="';
@@ -325,8 +340,8 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		    if (is_array($files["file"])) {
 			  foreach($files["file"] as $idx => $file){
 				$chk_file = null;
-				if ($this->endsWith($file, $streamSuffix)){
-					$this->patchFileBetween($files["path"][$idx].$file, $start, $end, $stream);
+				if ($this->object->endsWith($file, $streamSuffix)){
+					$this->object->patchFileBetween($files["path"][$idx].$file, $start, $end, $stream);
 					break;}}}            
         $streamSuffix2 = "_player.html";
         $start = 'TSC.playerConfiguration.addMediaSrc("';
@@ -336,8 +351,8 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		    if (is_array($files["file"])) {
 			  foreach($files["file"] as $idx => $file){
 				$chk_file = null;
-				if ($this->endsWith($file, $streamSuffix2)){
-					$this->patchFileBetween($files["path"][$idx].$file, $start, $end, $stream);
+				if ($this->object->endsWith($file, $streamSuffix2)){
+					$this->object->patchFileBetween($files["path"][$idx].$file, $start, $end, $stream);
 					break;}}}
         
         $newObj->doUpdate();
@@ -348,40 +363,8 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
             else
                 { ilUtil::sendFailure($this->txt("file_not_patched"), true); }  
 	
-        $this->ctrl->redirect($this, "uploadCamtasiaForm2");
+        $this->ctrl->redirect($this, "uploadCamtasiaForm");
         }
-
-
-	private function extractToTemporaryDir()
-	{
-		// create temporary directory
-		$tmpdir = ilUtil::ilTempnam();
-		ilUtil::makeDir($tmpdir);
-		$temp_name = $_FILES["upload_file"]["tmp_name"];
-		$filename= $_FILES["upload_file"]["name"];
-		ilUtil::moveUploadedFile($temp_name, $filename, $tmpdir . "/" . $filename);
-		ilUtil::unzip($tmpdir."/".$filename);
-		unlink($tmpdir."/".$filename);
-        return $tmpdir;
-	}
-    
-        private function extractToTemporaryDirTemplate()
-	{	
-		// create temporary directory
-		$tmpdir = ilUtil::ilTempnam();
-		ilUtil::makeDir($tmpdir);
-        $filename= $this->object->getTempfile();
-        $temp_name = substr($_SERVER['SCRIPT_FILENAME'], 0, -10). "/Customizing/global/plugins/Services/Repository/RepositoryObject/Camtasia/templates/".$filename;;
-		copy($temp_name, $tmpdir."/".$filename);
-		ilUtil::unzip($tmpdir."/".$filename);
-        unlink($tmpdir."/".$filename);
-        return $tmpdir;
-    }
-   
-	private function endsWith($haystack, $needle) {
-		// search forward starting from end minus needle length characters
-		return $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== false);
-	}
 
 	// --
 	/**
@@ -400,7 +383,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		// settings tab with write permission
 		if ($ilAccess->checkAccess("write", "", $this->object->getRefId()))
 		{
-			$ilTabs->addTab("upload", $this->txt('upload'), $ilCtrl->getLinkTarget($this, "uploadCamtasiaForm2"));
+			$ilTabs->addTab("upload", $this->txt('upload'), $ilCtrl->getLinkTarget($this, "uploadCamtasiaForm"));
         }
             
         // standard info screen tab
@@ -430,18 +413,6 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		$this->form->setValuesByArray($values);
 	}
     
-    	function getStartValues()
-	{
-		$values["title"] = $this->object->getTitle();
-		$values["desc"] = $this->object->getDescription();
-        $values["http"] = "";
-		$values["online"] = $this->object->getOnline();
-		$values["playerfile"] = "";
-        $values["filesw"] = "new_file";
-        $values["newfile"] = 1;
-		$this->form->setValuesByArray($values);
-	}
-
 	/**
 	 * Update properties
 	 */
@@ -455,7 +426,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 			$this->object->setTitle($this->form->getInput("title"));
 			$this->object->setDescription($this->form->getInput("desc"));
 			$this->object->setPlayerFile($this->form->getInput("playerfile"));
-            //$this->object->sethttp($this->form->getInput("http")); //update stream only with new file
+            $this->object->setOnline($this->form->getInput("online"));
             
             // one title for all
             $titleSuffix = "_player.html";
@@ -466,14 +437,13 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		    if (is_array($files["file"])) {
 			  foreach($files["file"] as $idx => $file){
 				$chk_file = null;
-				if ($this->endsWith($file, $titleSuffix)){
-					$this->patchFileBetween($files["path"][$idx].substr($file, 0, strlen($file) - 12).".html", $start, $end, $this->object->getTitle());
+				if ($this->object->endsWith($file, $titleSuffix)){
+					$this->object->patchFileBetween($files["path"][$idx].substr($file, 0, strlen($file) - 12).".html", $start, $end, $this->object->getTitle());
                     break;}}}
             
-			$this->object->setOnline($this->form->getInput("online"));
-			$this->object->update();
+            $this->object->update();
 			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
-			$ilCtrl->redirect($this, "uploadCamtasiaForm2");
+			$ilCtrl->redirect($this, "uploadCamtasiaForm");
 		}
 
 		$this->form->setValuesByPost();
@@ -495,17 +465,9 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 			$playerFileFullPath = $this->object->getDataDirectory().'/'.$playerFile;
             ilUtil::redirect($playerFileFullPath); 
 		} else {
-			$ilTabs->activateTab("content");
+			$ilTabs->activateTab("Content");
             ilUtil::sendFailure($this->txt("no_record"));
 		}
-	}
-    
-    protected function showExport() 
-    {	
-        require_once("./Services/Export/classes/class.ilExportGUI.php");
-		$export = new ilExportGUI($this);
-		$export->addFormat("html", "", $this, "exportHTML");
-		$ret = $this->ctrl->forwardCommand($export);
 	}
     
     /**
@@ -564,27 +526,5 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		ilUtil::zip($target_dir, $zip_file);
 		ilUtil::delDir($target_dir);
 	}
-
-
-	private function patchFile($file, $old, $new)
-	{
-		if (is_file($file))
-		{
-			$content = file_get_contents($file);
-			$content = str_replace($old, $new, $content);
-			file_put_contents($file, $content);
-		}
-	}
-    
-    	private function patchFileBetween($file, $start, $end, $new)
-	{
-		if (is_file($file))
-		{
-			$content = file_get_contents($file);
-			$content = preg_replace('#('.preg_quote($start).')(.*?)('.preg_quote($end).')#si', '$1'.$new.'$3', $content);
-			file_put_contents($file, $content);
-		}
-	}      
-    
 }
 ?>
