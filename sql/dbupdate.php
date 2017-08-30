@@ -48,7 +48,9 @@ $fields = array(
 				'notnull' => true
         ),
         'backup' => array(
-				'type' => 'boolean'
+				'type' => 'integer',
+                'length' => 1,
+                'notnull' => false
         )
 );   
 $ilDB->createTable("rep_robj_xcam_config", $fields);

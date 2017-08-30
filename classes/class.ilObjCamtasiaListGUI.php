@@ -19,6 +19,7 @@ class ilObjCamtasiaListGUI extends ilObjectPluginListGUI
     function initType()
     {
         $this->setType("xcam");
+        $this->copy_enabled = true;
     }
 
     /**

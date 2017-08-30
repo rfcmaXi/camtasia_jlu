@@ -105,7 +105,7 @@ class ilCamtasiaConfigGUI extends ilPluginConfigGUI
 		}
 	}
 
-        private function setConfig($a_val, $b_val, $c_val, $d_val)
+        private function setConfig($a_val, $b_val, $c_val)
 	{
 		global $ilDB;
 	

@@ -15,5 +15,12 @@ class ilCamtasiaPlugin extends ilRepositoryObjectPlugin
 	{
 		return "Camtasia";
 	}
+    
+    protected function uninstallCustom()
+	{
+		global $ilDB;
+		$ilDB->dropTable('rep_robj_xcam_data');
+		$ilDB->dropTable('rep_robj_xcam_config');
+	}
 }
 ?>
