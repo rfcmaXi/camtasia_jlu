@@ -356,13 +356,23 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 					break;}}}
         
         $newObj->doUpdate();
+        
+        /* Record write or update Event, no need to record, if u like to use add $new_update to function
+        require_once('Services/Tracking/classes/class.ilChangeEvent.php');
+        global $ilUser;
+        if ($new_update == 1) { 
+                ilChangeEvent::_recordWriteEvent($this->object->getId(), $ilUser->getId(), 'update');
+			    ilChangeEvent::_catchupWriteEvents($this->object->getId(), $ilUser->getId()); }       
+        else {
+        ilChangeEvent::_recordWriteEvent($this->object->getId(), $ilUser->getId(), 'create'); } 
+        */
 		
         // are this camtasia files?
-            if ($newObj->getPlayerFile() != "")
-                { ilUtil::sendSuccess($this->txt("file_patched"), true); }
-            else
-                { ilUtil::sendFailure($this->txt("file_not_patched"), true); }  
-	
+        if ($newObj->getPlayerFile() != "")
+            { ilUtil::sendSuccess($this->txt("file_patched"), true); }
+        else
+            { ilUtil::sendFailure($this->txt("file_not_patched"), true); }
+        
         $this->ctrl->redirect($this, "uploadCamtasiaForm");
         }
 
@@ -442,6 +452,14 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
                     break;}}}
             
             $this->object->update();
+            
+            /* Record update event, no need to record...
+            require_once('Services/Tracking/classes/class.ilChangeEvent.php');
+			global $ilUser;
+			ilChangeEvent::_recordWriteEvent($this->object->getId(), $ilUser->getId(), 'update');
+			ilChangeEvent::_catchupWriteEvents($this->object->getId(), $ilUser->getId());
+            */
+            
 			ilUtil::sendSuccess($lng->txt("msg_obj_modified"), true);
 			$ilCtrl->redirect($this, "uploadCamtasiaForm");
 		}
@@ -462,8 +480,14 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 
 		if ($playerFile != "")
 		{
-			$playerFileFullPath = $this->object->getDataDirectory().'/'.$playerFile;
-            ilUtil::redirect($playerFileFullPath); 
+            // Record read event
+			require_once('Services/Tracking/classes/class.ilChangeEvent.php');
+			ilChangeEvent::_recordReadEvent($this->object->getType(), $this->object->getRefId(),
+				$this->object->getId(), $ilUser->getId());			
+            
+            // Play file
+            $playerFileFullPath = $this->object->getDataDirectory().'/'.$playerFile;   
+            ilUtil::redirect($playerFileFullPath);
 		} else {
 			$ilTabs->activateTab("Content");
             ilUtil::sendFailure($this->txt("no_record"));
