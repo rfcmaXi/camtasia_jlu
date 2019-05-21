@@ -224,7 +224,7 @@ class ilObjCamtasia extends ilObjectPlugin
 	 * Do Cloning
 	 */    
     
-    function doCloneObject(ilObjCamtasia $new_obj, $a_target_id, $a_copy_id = 0) {
+    function doCloneObject($new_obj, $a_target_id, $a_copy_id = NULL) {
         $new_obj->cloneStructure($this->getRefId());
         //return $new_obj;
 	}
@@ -295,7 +295,7 @@ class ilObjCamtasia extends ilObjectPlugin
 		return $cam_dir;
 	}
 
-    function getTempfile()
+    public static function getTempfile()
 	{
 		global $ilDB;
 	
@@ -307,7 +307,7 @@ class ilObjCamtasia extends ilObjectPlugin
 		return null;
 	}
     
-    function getEXURL()
+    public static function getEXURL()
 	{
 		global $ilDB;
 	
@@ -319,7 +319,7 @@ class ilObjCamtasia extends ilObjectPlugin
 		return null;
 	}
     
-    function getVideoserver()
+    public static function getVideoserver()
 	{
 		global $ilDB;
 	
@@ -379,5 +379,32 @@ class ilObjCamtasia extends ilObjectPlugin
 			$content = preg_replace('#('.preg_quote($start).')(.*?)('.preg_quote($end).')#si', '$1'.$new.'$3', $content);
 			file_put_contents($file, $content);}
 	} 
+
+    /**
+	 * Returns files for embedding the player via object/embed/iframe tag
+	 */
+	public function getFullscreenPlayer() {
+		$player = $this->getPlayerFile();
+		$pos    = strrpos($player, '.html');
+		if ($pos) {
+			$player    = substr_replace($player, '_player.html', $pos, strlen('.html'));
+			$directory = $this->getDataDirectory();
+			return "{$directory}/{$player}";
+		}
+
+		return false;
+	}
+	public function getEmbedCSS() {
+		$player = $this->getPlayerFile();
+		$pos    = strrpos($player, '.html');
+		if ($pos) {
+			$player    = substr_replace($player, '_embed.css', $pos, strlen('.html'));
+			$directory = $this->getDataDirectory();
+			return "{$directory}/{$player}";
+		}
+
+		return false;
+	}
+
 }
 ?>
