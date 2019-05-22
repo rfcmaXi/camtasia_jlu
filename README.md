@@ -4,7 +4,7 @@ ILIAS Plugin zur Einbindung von Camtasia-Aufzeichnungen in ILIAS und Verknüpfun
 
 ## Installation
 
-ILIAS 5.0.0 - 5.0.99
+ILIAS 5.0.0 - 5.4.99
 ```bash
 mkdir -p Customizing/global/plugins/Services/Repository/RepositoryObject
 cd Customizing/global/plugins/Services/Repository/RepositoryObject
