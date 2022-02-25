@@ -102,3 +102,19 @@ $ilDB->dropTableColumn("rep_robj_xcam_config", "backup");
 		$ilDB->manipulate($query);
 	}
 ?>
+
+<#5>
+<?php
+	/**
+	* Add primary key because of Galera Cluster support
+	*/
+	$ilDB->addTableColumn("rep_robj_xcam_config", "id",
+		array(
+			'type' => 'integer',
+			'length' => 4,
+			'notnull' => true,
+//			'autoincrement' => true
+		));
+	$ilDB->addPrimaryKey("rep_robj_xcam_config", array("id"));
+	$ilDB->query("ALTER TABLE rep_robj_xcam_config MODIFY COLUMN id INT AUTO_INCREMENT;");
+?>
