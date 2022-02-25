@@ -72,7 +72,6 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 	function getStandardCmd()
 	{
 		return "showContent";
-        
 	}
 
 	/**
@@ -87,10 +86,11 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 	 * @param string $type
 	 * @return array
 	 */
-    protected function initCreationForms($type)
+	protected function initCreationForms($type)
 	{
 		return array(
-			self::CFORM_NEW => $this->initCreateForm($type)
+			self::CFORM_NEW => $this->initCreateForm($type),
+			//self::CFORM_IMPORT => $this->initImportForm($type)
 		);
 	}
 
@@ -98,47 +98,46 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 	 * @param string $type
 	 * @return ilPropertyFormGUI
 	 */
-    	public function  initCreateForm($type)
+	public function  initCreateForm($type)
 	{
 		$form = parent::initCreateForm($type);
-        $this->plugin->includeClass('class.ilObjCamtasia.php');
-        
-        // Send additional information
-        $form->setDescription($this->txt('limitations'));
-        
-        //Instant Online
-        $online = new ilCheckboxInputGUI($this->lng->txt('online'), 'online');
+		$this->plugin->includeClass('class.ilObjCamtasia.php');
+		
+		// Send additional information
+		$form->setDescription($this->txt('limitations'));
+
+		//Instant Online
+		$online = new ilCheckboxInputGUI($this->lng->txt('online'), 'online');
 		$form->addItem($online);
-        
-        // Http-Stream
+
+		// Http-Stream
 		$ht = new ilTextInputGUI($this->txt("stream"), "stream");
-        $ht->setMaxLength(128);
-        $ht->setSize(40);
-        $ht->setRequired(true);
-        //Example URL
-        $ht->setInfo($this->txt("stream_info") . " " . ilObjCamtasia::getEXURL());
+		$ht->setMaxLength(128);
+		$ht->setSize(40);
+		$ht->setRequired(true);
+		//Example URL
+		$ht->setInfo($this->txt("stream_info") . " " . ilObjCamtasia::getEXURL());
 		$form->addItem($ht);  
-        
-        // Template or new Zip?
-        $si = new ilRadioGroupInputGUI($this->txt("filesw"), "filesw");
-        $si->setRequired(true);
-        
-        $si2 = new ilRadioOption($this->txt("new_file"), "new_file");
-        $in_file = new ilFileInputGUI($this->txt("upload_file"), "upload_file");
-        $in_file->setRequired(true);
-        $in_file->setSuffixes(array("zip", "ZIP"));
-        $si2->addSubItem($in_file);
-        $si->addOption($si2);
-        
-        $tt = new ilRadioOption($this->txt("tafel_template"), "tafel_template");
-        $tt->setInfo(ilObjCamtasia::getTempfile() . " " . $this->txt("template_info"));
-        $si->addOption($tt);
-        $si->setValue("new_file");
-        $form->addItem($si);
-        
-        return $form;
-    }
-    
+
+		// Template or new Zip?
+		$si = new ilRadioGroupInputGUI($this->txt("filesw"), "filesw");
+		$si->setRequired(true);
+
+		$si2 = new ilRadioOption($this->txt("new_file"), "new_file");
+		$in_file = new ilFileInputGUI($this->txt("upload_file"), "upload_file");
+		$in_file->setRequired(true);
+		$in_file->setSuffixes(array("zip", "ZIP"));
+		$si2->addSubItem($in_file);
+		$si->addOption($si2);
+
+		$tt = new ilRadioOption($this->txt("tafel_template"), "tafel_template");
+		$tt->setInfo(ilObjCamtasia::getTempfile() . " " . $this->txt("template_info"));
+		$si->addOption($tt);
+		$si->setValue("new_file");
+		$form->addItem($si);
+
+		return $form;
+	}
 
 	/**
 	* Upload CamtasiaZipFile. This commands uses the form class to display an input form.
@@ -146,9 +145,10 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 	function uploadCamtasiaForm()
 	{
 		global $tpl, $ilTabs;
+
 		$ilTabs->activateTab("upload");
-        $this->initImportForm($this->getType());
-        $this->getPropertiesValues();
+		$this->initImportForm($this->getType());
+		$this->getPropertiesValues();
 		$tpl->setContent($this->form->getHTML());
 	}
 
@@ -204,18 +204,18 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 	 * Import Action
 	 * set by initImportForm
 	 */
-    
-    private function addnewFile(ilPropertyFormGUI $form_gui)
-     {   
-        $header_tr = new ilFormSectionHeaderGUI();
+
+	private function addnewFile(ilPropertyFormGUI $form_gui)
+	{
+		$header_tr = new ilFormSectionHeaderGUI();
 		$header_tr->setTitle($this->txt('new_file_title'));
-        $header_tr->setInfo($this->txt("limitations2"));
+		$header_tr->setInfo($this->txt("limitations2"));
 		$form_gui->addItem($header_tr);
-         
-        // new upload
+ 
+		// new upload
 		$upl = new ilCheckboxInputGUI($this->txt("newfileform"), "newfile");
-         
-        // Http-Stream
+
+		// Http-Stream
 		$ht = new ilTextInputGUI($this->txt("stream"), "stream");
         $ht->setMaxLength(128);
         $ht->setSize(40);
@@ -223,7 +223,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
         //Example URL
         $ht->setInfo($this->txt("stream_info") . " " . $this->object->getEXURL());
 		$upl->addSubItem($ht);
-        
+
 		// Template or new Zip?
         $si = new ilRadioGroupInputGUI($this->txt("filesw"), "filesw");
         $si->setRequired(true);
@@ -480,50 +480,51 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 
 		if ($playerFile != "")
 		{
-            // Record read event
+			// Record read event
 			require_once('Services/Tracking/classes/class.ilChangeEvent.php');
 			ilChangeEvent::_recordReadEvent($this->object->getType(), $this->object->getRefId(),
 				$this->object->getId(), $ilUser->getId());			
-            
-            // Play file
-            $playerFileFullPath = $this->object->getDataDirectory().'/'.$playerFile;   
-            ilUtil::redirect($playerFileFullPath);
+
+			// Play file
+			$playerFileFullPath = $this->object->getDataDirectory().'/'.$playerFile;   
+			ilUtil::redirect($playerFileFullPath);
 		} else {
 			$ilTabs->activateTab("Content");
-            ilUtil::sendFailure($this->txt("no_record"));
+			ilUtil::sendFailure($this->txt("no_record"));
 		}
 	}
-    
-    /**
+
+	/**
 	 * Export content
 	 */ 
-    public function executeCommand() 
-    {
+	public function executeCommand() 
+	{
 		global $ilTabs, $tpl;
-		
-        $next_class = $this->ctrl->getNextClass($this);
+
+		$next_class = $this->ctrl->getNextClass($this);
+
 		switch ($next_class) {
 			case 'ilexportgui':
-				$tpl->setTitle($this->object->getTitle());;
-				$tpl->setTitleIcon(ilObject::_getIcon($this->object->getId()));
-				$this->setLocator();
-				$tpl->getStandardTemplate();
-				$this->setTabs();
-				include_once './Services/Export/classes/class.ilExportGUI.php';
-				$ilTabs->activateTab("export");
-				$exp = new ilExportGUI($this);
-				//$exp->addFormat('xml'); // no need for xml export
-                $exp->addFormat("html", "", $this, "exportHTML");
-				$this->ctrl->forwardCommand($exp);
-				$tpl->show();
-				return;
-				break;
+			$this->setTitleAndDescription();
+			$this->setTabs();
+			$this->setLocator();
+			$tpl->loadStandardTemplate();
+
+			$ilTabs->activateTab("export");
+			include_once './Services/Export/classes/class.ilExportGUI.php';
+			$exp_gui = new ilExportGUI($this);
+			$exp_gui->addFormat('xml');
+			$exp_gui->addFormat("html", "", $this, "exportHTML");
+			$this->ctrl->forwardCommand($exp_gui);
+			$tpl->printToStdout();
+			break;
+
+		default:
+			return parent::executeCommand();
 		}
-		$return_value = parent::executeCommand();
-		return $return_value;
 	}
-    
-    /**
+
+	/**
 	 * create html package
 	 */
 	function exportHTML()
@@ -551,4 +552,3 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		ilUtil::delDir($target_dir);
 	}
 }
-?>

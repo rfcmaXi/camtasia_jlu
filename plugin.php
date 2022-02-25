@@ -4,7 +4,7 @@
 $id = "xcam";
  
 // code version; must be changed for all code changes
-$version = "1.2.2";
+$version = "1.2.3";
  
 // ilias min and max version; must always reflect the versions that should
 // run with the plugin
@@ -15,5 +15,4 @@ $ilias_max_version = "7.999";
 $responsible = "Martin Gorgas";
 $responsible_mail = "Martin.Gorgas@hrz.uni-giessen.de";
 
-$supports_export = true;
-?>
+$supports_export = false;
