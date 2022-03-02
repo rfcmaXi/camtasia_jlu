@@ -513,7 +513,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 			$ilTabs->activateTab("export");
 			include_once './Services/Export/classes/class.ilExportGUI.php';
 			$exp_gui = new ilExportGUI($this);
-			$exp_gui->addFormat('xml');
+			// $exp_gui->addFormat('xml'); no ILIAS-xml-Format jet
 			$exp_gui->addFormat("html", "", $this, "exportHTML");
 			$this->ctrl->forwardCommand($exp_gui);
 			$tpl->printToStdout();
