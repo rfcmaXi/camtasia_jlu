@@ -36,7 +36,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		{
 			case "importCamtasiaAction": // list all commands that need write permission here
 			case "uploadCamtasiaForm":
-            case "initImportForm":
+            case "initImportFormNew":
             case "ilexportgui":
             case "exportHTML":
 				$this->checkPermission("write");
@@ -147,12 +147,12 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 		global $tpl, $ilTabs;
 
 		$ilTabs->activateTab("upload");
-		$this->initImportForm($this->getType());
+		$this->initImportFormNew($this->getType());
 		$this->getPropertiesValues();
 		$tpl->setContent($this->form->getHTML());
 	}
 
-	protected function initImportForm($a_new_type)
+	protected function initImportFormNew($a_new_type)
 	{
 		global $lng, $tpl;
 		
@@ -202,7 +202,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 
 	/*
 	 * Import Action
-	 * set by initImportForm
+	 * set by initImportFormNew
 	 */
 
 	private function addnewFile(ilPropertyFormGUI $form_gui)
@@ -255,7 +255,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 			$ilErr->raiseError($this->txt("no_create_permission"));
 		}
         
-        $this->initImportForm($a_new_import);
+        $this->initImportFormNew($a_new_import);
 
         if ($this->form->checkInput())
                     
@@ -430,7 +430,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 	{
 		global $tpl, $lng, $ilCtrl;
 
-		$this->initImportForm($a_new_import2);
+		$this->initImportFormNew($a_new_import2);
 		if ($this->form->checkInput())
 		{
 			$this->object->setTitle($this->form->getInput("title"));
@@ -513,7 +513,7 @@ class ilObjCamtasiaGUI extends ilObjectPluginGUI
 			$ilTabs->activateTab("export");
 			include_once './Services/Export/classes/class.ilExportGUI.php';
 			$exp_gui = new ilExportGUI($this);
-			// $exp_gui->addFormat('xml'); no ILIAS-xml-Format jet
+			$exp_gui->addFormat('xml');
 			$exp_gui->addFormat("html", "", $this, "exportHTML");
 			$this->ctrl->forwardCommand($exp_gui);
 			$tpl->printToStdout();
