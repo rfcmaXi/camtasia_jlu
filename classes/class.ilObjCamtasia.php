@@ -38,31 +38,47 @@ class ilObjCamtasia extends ilObjectPlugin
 	function doCreate()
 	{
 		global $ilDB;
-        
-        // Clone-Mode
-        if (!isset($_POST['stream'])) {
-            $ilDB->manipulate("INSERT INTO rep_robj_xcam_data ".
+		
+		// Import-Mode - should only be set if an xcam module was imported
+		if ($this->gethttp() !== NULL) {
+			
+			$ilDB->manipulate("INSERT INTO rep_robj_xcam_data ".
 			"(id, http, is_online, player_file) VALUES (".
 			$ilDB->quote($this->getId(), "integer").",".
-			$ilDB->quote("x", "text").",".
-            $ilDB->quote(0, "integer").",".
-			$ilDB->quote("x", "text").
+			$ilDB->quote($this->gethttp(), "text").",".
+			$ilDB->quote($this->getOnline(), "integer").",".
+			$ilDB->quote($this->getPlayerFile(), "text").
 			")");
-           return;
-        }
+			
+			return;
+		}	
 
-        // Create-Mode if stream is correct
-		$server = $this->getVideoserver();
-        if (preg_match("#$server#", $_POST['stream'])) {
-        
-        $ilDB->manipulate("INSERT INTO rep_robj_xcam_data ".
+		// Clone-Mode - should only be set if an xcam module was copied
+		if (!isset($_POST['stream'])) {
+			
+			$ilDB->manipulate("INSERT INTO rep_robj_xcam_data ".
 			"(id, http, is_online, player_file) VALUES (".
 			$ilDB->quote($this->getId(), "integer").",".
 			$ilDB->quote("x", "text").",".
-            $ilDB->quote(0, "integer").",".
+			$ilDB->quote(0, "integer").",".
 			$ilDB->quote("x", "text").
 			")");
-        
+			
+			return;
+		}
+
+		// Create-Mode if stream is correct
+		$server = $this->getVideoserver();
+		if (preg_match("#$server#", $_POST['stream'])) {
+		
+		$ilDB->manipulate("INSERT INTO rep_robj_xcam_data ".
+			"(id, http, is_online, player_file) VALUES (".
+			$ilDB->quote($this->getId(), "integer").",".
+			$ilDB->quote("x", "text").",".
+			$ilDB->quote(0, "integer").",".
+			$ilDB->quote("x", "text").
+			")");
+
         // Import content
         // template or new zip?
         if ($_POST['filesw'] == "new_file") { 
@@ -144,15 +160,11 @@ class ilObjCamtasia extends ilObjectPlugin
         
         // Error if stream is not correct
 		else
-        {
-        ilUtil::sendFailure($this->txt("no_link"), true);
-        // very urgly redirect
-        //$id = strstr($_SERVER['QUERY_STRING'], "&", true);
-        //$id2 = $_SERVER['QUERY_STRING'];
-        //$url = "ilias.php?baseClass=ilRepositoryGUI&".$id."&cmd=create&new_type=xcam";
-        ilUtil::redirect($_SERVER['HTTP_REFERER']);
-        }   
-}
+		{
+		ilUtil::sendFailure($this->txt("no_link"), true);
+		ilUtil::redirect($_SERVER['HTTP_REFERER']);
+		} 
+	}
 
 	/**
 	 * Read data from db
@@ -271,6 +283,11 @@ class ilObjCamtasia extends ilObjectPlugin
 	function getPlayerFile()
 	{
 		return $this->player_file;
+	}
+	
+	function setPlayerFileImported($a_file)
+	{
+			$this->player_file = $a_file;
 	}
 
 	function setPlayerFile($a_file, $a_omit_file_check = false)
@@ -405,6 +422,4 @@ class ilObjCamtasia extends ilObjectPlugin
 
 		return false;
 	}
-
 }
-?>

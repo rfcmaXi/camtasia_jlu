@@ -79,18 +79,18 @@ class ilCamtasiaExporter extends ilXmlExporter {
 	
 	private function exportXMLSettings()
 	{
-	$this->xml_writer->xmlStartTag('Settings');
+		$this->xml_writer->xmlStartTag('Settings');
 
-	$this->xml_writer->xmlElement('Title', null, (string)$this->object->getTitle());
-	$this->xml_writer->xmlElement('Description', null, (string)$this->object->getDescription());
-	$this->xml_writer->xmlElement('Online', null, (int)$this->object->getOnline());
-	
-	$this->xml_writer->xmlElement('HTTP-Stream', null, (string)$this->object->gethttp());
-	$this->xml_writer->xmlElement('Playerfile', null, (string)$this->object->getPlayerFile());
-	
-	$this->exportFiles();
-	
-	$this->xml_writer->xmlEndTag('Settings');
+		$this->xml_writer->xmlElement('Title', null, (string)$this->object->getTitle());
+		$this->xml_writer->xmlElement('Description', null, (string)$this->object->getDescription());
+		$this->xml_writer->xmlElement('Online', null, (int)$this->object->getOnline());
+		
+		$this->xml_writer->xmlElement('HTTP-Stream', null, (string)$this->object->gethttp());
+		$this->xml_writer->xmlElement('Playerfile', null, (string)$this->object->getPlayerFile());
+		
+		$this->exportFiles();
+		
+		$this->xml_writer->xmlEndTag('Settings');
 	}
 
 	/**
@@ -98,19 +98,18 @@ class ilCamtasiaExporter extends ilXmlExporter {
 	 */
 	function exportFiles()
 	{
-	$this->xml_writer->xmlStartTag('HTMLFiles',);
-	$this->xml_writer->xmlElement('HTMLSource', null, $this->object->getType()."_".$this->object->getId());
-	$this->doExportCamtasiaSource($this->object->getId(), $this->xml_writer, $this->export_dir);
-	$this->xml_writer->xmlEndTag('HTMLFiles');
+		$this->xml_writer->xmlStartTag('HTMLFiles',);
+		$this->xml_writer->xmlElement('HTMLSource', null, $this->object->getType()."_".$this->object->getId());
+		$this->doExportCamtasiaSource($this->object->getId(), $this->xml_writer, $this->export_dir);
+		$this->xml_writer->xmlEndTag('HTMLFiles');
 	}
 	
 	public function doExportCamtasiaSource($obj_id, $xml_writer, $export_path)
 	{
-	ilUtil::makeDirParents($export_path . '/objects');
-	$source_dir = $this->object->getDataDirectory();
-	ilUtil::rCopy($source_dir, $export_path . '/objects');
-	
-	//$xml_writer->xmlElement('Objects', null, $export_path . '/objects'); what is it good for?
+		ilUtil::makeDirParents($export_path . '/objects');
+		$source_dir = $this->object->getDataDirectory();
+		ilUtil::rCopy($source_dir, $export_path . '/objects');
+		
+		$xml_writer->xmlElement('Objects', null, $export_path . '/objects'); what is it good for?
 	}
-
 }
