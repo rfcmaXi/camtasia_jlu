@@ -110,6 +110,6 @@ class ilCamtasiaExporter extends ilXmlExporter {
 		$source_dir = $this->object->getDataDirectory();
 		ilUtil::rCopy($source_dir, $export_path . '/objects');
 		
-		$xml_writer->xmlElement('Objects', null, $export_path . '/objects'); what is it good for?
+		$xml_writer->xmlElement('Objects', null, $export_path . '/objects');
 	}
 }
