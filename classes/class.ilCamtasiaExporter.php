@@ -17,10 +17,8 @@ class ilCamtasiaExporter extends ilXmlExporter {
 	 * @param    string        id
 	 * @return    string        xml string
 	 */
-	public function getXmlRepresentation($a_entity, $a_schema_version, $a_id) 
+	public function getXmlRepresentation(string $a_entity, string $a_schema_version, string $a_id): string
 	{
-		ilCamtasiaPlugin::getInstance()->includeClass('class.ilObjCamtasia.php');
-
 		$ref_id = current(ilObject::_getAllReferences($a_id));
 		$this->obj_id		= $a_id;
 		$this->object		= new ilObjCamtasia($ref_id);
@@ -35,12 +33,12 @@ class ilCamtasiaExporter extends ilXmlExporter {
 		return $this->xml_writer->xmlDumpMem();
 	}
 
-	public function init() 
+	public function init(): void
 	{
 		// TODO: Implement init() method.
 	}
 
-	public function getValidSchemaVersions($a_entity) 
+	public function getValidSchemaVersions(string $a_entity): array
 	{
 		return array(
 			'5.2.0' => array(
@@ -106,9 +104,9 @@ class ilCamtasiaExporter extends ilXmlExporter {
 	
 	public function doExportCamtasiaSource($obj_id, $xml_writer, $export_path)
 	{
-		ilUtil::makeDirParents($export_path . '/objects');
+		ilFileUtils::makeDirParents($export_path . '/objects');
 		$source_dir = $this->object->getDataDirectory();
-		ilUtil::rCopy($source_dir, $export_path . '/objects');
+		ilFileUtils::rCopy($source_dir, $export_path . '/objects');
 		
 		$xml_writer->xmlElement('Objects', null, $export_path . '/objects');
 	}

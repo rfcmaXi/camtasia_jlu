@@ -1,8 +1,6 @@
 <?php
 
 require_once("./Services/Export/classes/class.ilXmlImporter.php");
-ilCamtasiaPlugin::getInstance()->includeClass('class.ilObjCamtasia.php');
-ilCamtasiaPlugin::getInstance()->includeClass('class.ilCamtasiaXMLParser.php');
 
 /**
  * Class ilCamtasiaImporter
@@ -22,12 +20,12 @@ class ilCamtasiaImporter extends ilXmlImporter {
 	protected $xml_file;
 
 
-	public function init()
+	public function init(): void
 	{
 		$this->xml_file = $this->getImportDirectory().'/Plugins/xcam/set_1/export.xml';
 	}
 
-	public function importXmlRepresentation($a_entity, $a_id, $a_xml, $a_mapping)
+	public function importXmlRepresentation(string $a_entity, string $a_id, string $a_xml, ilImportMapping $a_mapping): void
 	{
 		global $tree, $ilDB;
 		
@@ -53,7 +51,7 @@ class ilCamtasiaImporter extends ilXmlImporter {
 
 			$this->xcam_object->create();
 			
-			ilUtil::rCopy($this->getImportDirectory().'/Plugins/xcam/set_1/expDir_1/objects/',$this->xcam_object->getDataDirectory());
+			ilFileUtils::rCopy($this->getImportDirectory().'/Plugins/xcam/set_1/expDir_1/objects/',$this->xcam_object->getDataDirectory());
 		}
 		$a_mapping->addMapping('Plugins/xcam', 'xcam', $a_id, $this->xcam_object->getId());
 	}

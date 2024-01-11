@@ -1,18 +1,16 @@
 <?php
-
-include_once("./Services/Component/classes/class.ilPluginConfigGUI.php");
- 
 /**
  * eLecture configuration user interface class
  *
  * @author Martin Gorgas
  * @version $Id$
  *
+ * @ilCtrl_IsCalledBy ilCamtasiaConfigGUI: ilObjComponentSettingsGUI
  */
 class ilCamtasiaConfigGUI extends ilPluginConfigGUI
 {
 	/* handles all commmands, default is "configure" */
-	function performCommand($cmd)
+	function performCommand(string $cmd): void
 	{
 
 		switch ($cmd)
@@ -31,33 +29,32 @@ class ilCamtasiaConfigGUI extends ilPluginConfigGUI
 		$form = $this->initConfigurationForm();
 		$tpl->setContent($form->getHTML());
 	}
-	
+
 	/* configuration form */
 	public function initConfigurationForm()
 	{
 		global $lng, $ilCtrl;
-		
-		$pl = $this->getPluginObject();
-	    $pl->includeClass("class.ilObjCamtasia.php");    
-        
+
+		$pl = $this->getPluginObject();   
+
 		include_once("Services/Form/classes/class.ilPropertyFormGUI.php");
 		$form = new ilPropertyFormGUI();
-	
+
 		//Videoserver
 		$ti = new ilTextInputGUI($pl->txt("videoserver_url"), "videoserver_url");
-        $ti->setValue(ilObjCamtasia::getVideoserver());
+		$ti->setValue(ilObjCamtasia::getVideoserver());
 		$ti->setRequired(true);
-        $ti->setInfo($pl->txt("videoserver_info"));
-  		$form->addItem($ti);
-        
-        //Example URL
+		$ti->setInfo($pl->txt("videoserver_info"));
+		$form->addItem($ti);
+
+		//Example URL
 		$ex = new ilTextInputGUI($pl->txt("ex_url"), "ex_url");
 		$ex->setValue(ilObjCamtasia::getEXURL());
 		$ex->setRequired(true);
-        $ex->setInfo($pl->txt("ex_info"));
-  		$form->addItem($ex);
-        
-        //Template File
+		$ex->setInfo($pl->txt("ex_info"));
+		$form->addItem($ex);
+
+		//Template File
 		$ex = new ilTextInputGUI($pl->txt("template_file"), "template_file");
 		$ex->setValue(ilObjCamtasia::getTempfile());
 		$ex->setRequired(true);
@@ -90,11 +87,11 @@ class ilCamtasiaConfigGUI extends ilPluginConfigGUI
             if (file_exists(substr($_SERVER['SCRIPT_FILENAME'], 0, -10). "/Customizing/global/plugins/Services/Repository/RepositoryObject/Camtasia/templates/".$tempfile)) {
             
             $this->setConfig($server, $exurl, $tempfile);            
-			ilUtil::sendSuccess($pl->txt("config_saved"), true);
+			$tpl->setOnScreenMessage('success',$pl->txt("config_saved"), true);
 			$ilCtrl->redirect($this, "configure");}
             
             else {
-            ilUtil::sendFailure($pl->txt("no_ttfile"), true);
+            $tpl->setOnScreenMessage('failure', $pl->txt("no_ttfile"), true);
             $form->setValuesByPost();
 			$tpl->setContent($form->getHtml());   }
 		}
@@ -114,4 +111,3 @@ class ilCamtasiaConfigGUI extends ilPluginConfigGUI
     }
     
 }
-?>

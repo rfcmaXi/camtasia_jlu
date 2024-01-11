@@ -1,7 +1,4 @@
 <?php
-
-include_once "./Services/Repository/classes/class.ilObjectPluginListGUI.php";
-
 /**
  * ListGUI implementation for Example object plugin. This one
  * handles the presentation in container items (categories, courses, ...)
@@ -25,7 +22,7 @@ class ilObjCamtasiaListGUI extends ilObjectPluginListGUI
     /**
      * Get name of gui class handling the commands
      */
-    function getGuiClass()
+    public function getGuiClass(): string
     {
         return "ilObjCamtasiaGUI";
     }
@@ -33,7 +30,7 @@ class ilObjCamtasiaListGUI extends ilObjectPluginListGUI
     /**
      * Get commands
      */
-    function initCommands()
+    public function initCommands(): array
     {
         return array
         (
@@ -57,13 +54,12 @@ class ilObjCamtasiaListGUI extends ilObjectPluginListGUI
      *                                "property" (string) => property name
      *                                "value" (string) => property value
      */
-    function getProperties()
+    public function getProperties(): array
     {
-        global $lng, $ilUser;
+        global $lng;
 
         $props = array();
 
-        $this->plugin->includeClass("class.ilObjCamtasiaAccess.php");
         if (!ilObjCamtasiaAccess::checkOnline($this->obj_id))
         {
             $props[] = array("alert" => true, "property" => $this->txt("status"),
@@ -78,17 +74,16 @@ class ilObjCamtasiaListGUI extends ilObjectPluginListGUI
         return $props;
     }
 
-
   /**
    * Get link targets/window
    */
-  public function getCommandFrame($cmd) {
-    switch ($cmd) {
-      case 'showContent';
-        return ilFrameTargetInfo::_getFrame('ExternalContent');
-      default:
-        return '';
+    public function getCommandFrame(string $cmd): string
+    {
+        switch ($cmd) {
+            case 'showContent':
+                return ilFrameTargetInfo::_getFrame('ExternalContent');
+            default:
+                return '';
+        }
     }
-  }
 }
-?>

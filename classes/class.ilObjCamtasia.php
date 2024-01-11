@@ -1,5 +1,4 @@
 <?php
-include_once("./Services/Repository/classes/class.ilObjectPlugin.php");
 
 /**
 * Application class for the camtasia repository object.
@@ -10,6 +9,8 @@ include_once("./Services/Repository/classes/class.ilObjectPlugin.php");
 */
 class ilObjCamtasia extends ilObjectPlugin
 {
+
+	private $http;
 
 	protected $online; // [bool]
 
@@ -27,7 +28,7 @@ class ilObjCamtasia extends ilObjectPlugin
 	/**
 	 * Get type.
 	 */
-	final function initType()
+	final function initType(): void
 	{
 		$this->setType("xcam");
 	}
@@ -35,9 +36,9 @@ class ilObjCamtasia extends ilObjectPlugin
 	/**
 	 * Create object
 	 */
-	function doCreate()
+	function doCreate(bool $clone_mode = false): void
 	{
-		global $ilDB;
+		global $tpl, $ilDB;
 		
 		// Import-Mode - should only be set if an xcam module was imported
 		if ($this->gethttp() !== NULL) {
@@ -86,7 +87,7 @@ class ilObjCamtasia extends ilObjectPlugin
         if ($_POST['filesw'] == "tafel_template"){
             $tempdir = $this->extractToTemporaryDirTemplate(); }
         $this->populateByDirectory($tempdir);
-		ilUtil::delDir($tempdir);
+		ilFileUtils::delDir($tempdir);
         
         $this->sethttp($_POST['stream']);
         $this->setOnline($_POST['online']);
@@ -152,16 +153,16 @@ class ilObjCamtasia extends ilObjectPlugin
         $this->doUpdate();
         // are this camtasia files?
         if ($this->getPlayerFile() != "")
-            { ilUtil::sendSuccess($this->txt("file_patched"), true); }
+            { $tpl->setOnScreenMessage('success', $this->txt("file_patched"), true); }
         else
-            { ilUtil::sendFailure($this->txt("file_not_patched"), true); }
+            { $tpl->setOnScreenMessage('failure', $this->txt("file_not_patched"), true); }
         return;
         }
         
         // Error if stream is not correct
 		else
 		{
-		ilUtil::sendFailure($this->txt("no_link"), true);
+		$tpl->setOnScreenMessage('failure', $this->txt("no_link"), true);
 		ilUtil::redirect($_SERVER['HTTP_REFERER']);
 		} 
 	}
@@ -169,7 +170,7 @@ class ilObjCamtasia extends ilObjectPlugin
 	/**
 	 * Read data from db
 	 */
-	function doRead()
+	function doRead(): void
 	{
 		global $ilDB;
 
@@ -187,7 +188,7 @@ class ilObjCamtasia extends ilObjectPlugin
     /**
 	 * Update data
 	 */
-	function doUpdate()
+	function doUpdate(): void
 	{
 		global $ilDB;
 
@@ -202,7 +203,8 @@ class ilObjCamtasia extends ilObjectPlugin
 	/**
 	 * Delete data from db
 	 */
-	public function doDelete() {
+	protected function doDelete(): void
+	{
 		global $ilDB;
 
 		// Delete object
@@ -210,7 +212,7 @@ class ilObjCamtasia extends ilObjectPlugin
                 $ilDB->quote($this->getId(), "integer")
         );
 		// Delete content of data-directory
-		ilUtil::delDir($this->getDataDirectory());
+		ilFileUtils::delDir($this->getDataDirectory());
 	}
 
 
@@ -235,27 +237,28 @@ class ilObjCamtasia extends ilObjectPlugin
     /**
 	 * Do Cloning
 	 */    
-    
-    function doCloneObject($new_obj, $a_target_id, $a_copy_id = NULL) {
+    protected function doCloneObject(ilObject2 $new_obj, int $a_target_id, ?int $a_copy_id = null): void
+    {
         $new_obj->cloneStructure($this->getRefId());
         //return $new_obj;
 	}
-    
-    function cloneStructure($original_id) {
-		$original = new ilObjCamtasia($original_id);
-        ilUtil::rCopy($original->getDataDirectory(), $this->getDataDirectory());
+
+    function cloneStructure($original_id)
+    {
+        global $tpl;
+        
+        $original = new ilObjCamtasia($original_id);
+        ilFileUtils::rCopy($original->getDataDirectory(), $this->getDataDirectory());
         $this->sethttp($original->gethttp());
-		$this->setPlayerFile($original->getPlayerFile());
+        $this->setPlayerFile($original->getPlayerFile());
         $this->setOnline(false); // Copy must be offline
         $this->doUpdate();
-        
+
         // After Cloning forward to $new_obj settings tab        
-        ilUtil::sendSuccess($this->txt("copy_successful"), true);
+        $tpl->setOnScreenMessage('success', $this->txt("copy_successful"), true);
         ilUtil::redirect("ilias.php?baseClass=ilObjPluginDispatchGUI&cmd=forward&ref_id=".$this->getRefId()."&forwardCmd=uploadCamtasiaForm");
-        
-        
     }
-   
+
     /**
 	 * Setter and Getter
 	 */ 
@@ -302,12 +305,12 @@ class ilObjCamtasia extends ilObjectPlugin
 	function getDataDirectory($mode = "filesystem")
 	{
 		global $ilLog;
-		$cam_data_dir = ilUtil::getWebspaceDir($mode)."/xcam_data";
-		ilUtil::makeDir($cam_data_dir);
+		$cam_data_dir = ilFileUtils::getWebspaceDir($mode)."/xcam_data";
+		ilFileUtils::makeDir($cam_data_dir);
 		$ilLog->write("Creating data dir: ".$cam_data_dir);
 
 		$cam_dir = $cam_data_dir."/xcam_".$this->getId();
-		ilUtil::makeDir($cam_dir);
+		ilFileUtils::makeDir($cam_dir);
 
 		return $cam_dir;
 	}
@@ -350,30 +353,30 @@ class ilObjCamtasia extends ilObjectPlugin
     
     function populateByDirectory($a_dir)
 	{
-		ilUtil::rCopy($a_dir, $this->getDataDirectory());
-		ilUtil::renameExecutables($this->getDataDirectory());
+		ilFileUtils::rCopy($a_dir, $this->getDataDirectory());
+		ilFileUtils::renameExecutables($this->getDataDirectory());
 	}
     
     public function extractToTemporaryDir()
 	{
-		$tmpdir = ilUtil::ilTempnam();
-		ilUtil::makeDir($tmpdir);
+		$tmpdir = ilFileUtils::ilTempnam();
+		ilFileUtils::makeDir($tmpdir);
 		$temp_name = $_FILES["upload_file"]["tmp_name"];
 		$filename= $_FILES["upload_file"]["name"];
-		ilUtil::moveUploadedFile($temp_name, $filename, $tmpdir . "/" . $filename);
-		ilUtil::unzip($tmpdir."/".$filename);
+		ilFileUtils::moveUploadedFile($temp_name, $filename, $tmpdir . "/" . $filename);
+		ilFileUtils::unzip($tmpdir."/".$filename);
 		unlink($tmpdir."/".$filename);
         return $tmpdir;
 	}
     
     public function extractToTemporaryDirTemplate()
 	{	
-		$tmpdir = ilUtil::ilTempnam();
-		ilUtil::makeDir($tmpdir);
+		$tmpdir = ilFileUtils::ilTempnam();
+		ilFileUtils::makeDir($tmpdir);
         $filename= $this->getTempfile();
         $temp_name = substr($_SERVER['SCRIPT_FILENAME'], 0, -10). "/Customizing/global/plugins/Services/Repository/RepositoryObject/Camtasia/templates/".$filename;;
 		copy($temp_name, $tmpdir."/".$filename);
-		ilUtil::unzip($tmpdir."/".$filename);
+		ilFileUtils::unzip($tmpdir."/".$filename);
         unlink($tmpdir."/".$filename);
         return $tmpdir;
     }

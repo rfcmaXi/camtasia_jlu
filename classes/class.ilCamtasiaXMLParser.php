@@ -13,6 +13,7 @@ class ilCamtasiaXMLParser extends ilSaxParser {
 	 * @var ilObjCamtasia
 	 */
 	protected $xcam_obj;
+	protected $cdata = '';
 
 	/**
 	 * @param ilObjCamtasia $xcam_obj
@@ -135,7 +136,7 @@ class ilCamtasiaXMLParser extends ilSaxParser {
 	/**
 	 * @param $xmlParser
 	 */
-	public function setHandlers($xmlParser)
+	public function setHandlers($xmlParser): void
 	{
 		xml_set_object($xmlParser, $this);
 		xml_set_element_handler($xmlParser, 'handlerBeginTag', 'handlerEndTag');
